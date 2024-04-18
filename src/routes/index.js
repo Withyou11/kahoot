@@ -3,8 +3,8 @@ import CreateQuestions from '~/pages/CreateQuestions/CreateQuestions';
 
 // Public routes
 const publicRoutes = [
-  { path: '/', component: Home },
-  { path: '/create-questions', component: CreateQuestions },
+    { path: '/', component: Home },
+    { path: '/create-questions', component: CreateQuestions },
 ];
 
 const privateRoutes = [];
