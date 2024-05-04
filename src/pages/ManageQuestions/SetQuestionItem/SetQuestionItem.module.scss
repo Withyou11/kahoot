@@ -1,0 +1,109 @@
+.wrapper {
+    width: 100%;
+    height: 400px;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.cover-image {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    background: #ccc;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    text-align: center;
+    line-height: 240px;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.set-item {
+    width: 100%;
+    height: 100%;
+
+    &:hover {
+        cursor: pointer;
+        // border-color: transparent;
+        border-radius: 1.2rem;
+        background: #fff;
+        box-shadow: 0px 18px 36px 0px rgba(0, 0, 0, 0.1);
+    }
+
+    &__info {
+        padding: 10px;
+    }
+
+    &__heading {
+        font-size: 2rem;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    &__desc {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        margin-top: 4px;
+        font-size: 1.8rem;
+    }
+
+    &__time {
+        margin-top: 10px;
+        font-style: italic;
+        text-align: right;
+    }
+
+    &__img {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    &__cta {
+        display: flex;
+        column-gap: 10px;
+        margin-top: 10px;
+    }
+
+    &__edit-btn {
+        flex: 1;
+        height: 46px;
+        border: none;
+        outline: none;
+        border-radius: 999px;
+        cursor: pointer;
+        background: #ebebeb;
+        font-size: 1.8rem;
+        font-weight: 600;
+        transition: opacity 0.5s scale 0.5s;
+
+        &:hover {
+            opacity: 0.8;
+            scale: 1.1;
+        }
+    }
+
+    &__play-btn {
+        flex: 1;
+        height: 46px;
+        border: none;
+        outline: none;
+        border-radius: 999px;
+        cursor: pointer;
+        background: #5571ec;
+        color: white;
+        font-size: 1.8rem;
+        font-weight: 600;
+        transition: opacity 0.5s scale 0.5s;
+
+        &:hover {
+            opacity: 0.8;
+            scale: 1.1;
+        }
+    }
+}

@@ -8,13 +8,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 const cx = classNames.bind(styles);
 
 function QuestionContent({ selectedQuestion, setQuestions }) {
+    console.log(selectedQuestion);
     const fileInputRef = useRef(null);
-
     const [content, setContent] = useState(selectedQuestion.content);
-    const [answers, setAnswers] = useState(selectedQuestion.answers);
-    const [correctAnswers, setCorrectAnswers] = useState(selectedQuestion.correctAnswers);
+    const [answers, setAnswers] = useState(selectedQuestion.options);
+    const [timer, setTimer] = useState(selectedQuestion.timer);
 
-    const [image, setImage] = useState(selectedQuestion.imageUrl);
+    const [explain, setExplain] = useState(selectedQuestion.explanationContent);
+
+    const [image, setImage] = useState(selectedQuestion.mediaUrl);
+    const [base64Image, setBase64Image] = useState(null);
 
     const handleInputButtonClick = (event) => {
         event.preventDefault();
@@ -37,10 +40,8 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
         });
     };
 
-    const handleAnswerChange = (index, value) => {
-        const newAnswers = [...answers];
-        newAnswers[index] = value;
-        setAnswers(newAnswers);
+    const handleInputExplainChange = (event) => {
+        setExplain(event.target.value);
 
         setQuestions((prevQuestions) => {
             const selectedQuestionIndex = prevQuestions.findIndex((question) => question.id === selectedQuestion.id);
@@ -48,49 +49,91 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
             if (selectedQuestionIndex === -1) return prevQuestions;
 
             const newQuestions = [...prevQuestions];
-            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], answers: newAnswers };
+            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], explanationContent: event.target.value };
             newQuestions[selectedQuestionIndex] = updatedQuestion;
 
             return newQuestions;
         });
+    };
+
+    const handleAnswerChange = (index, value) => {
+        setAnswers((prevAnswers) => {
+            const newAnswers = [...prevAnswers];
+            newAnswers[index] = { ...newAnswers[index], content: value };
+            return newAnswers;
+        });
+
+        updateQuestions();
     };
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
-        setImage(URL.createObjectURL(file));
+        const reader = new FileReader();
 
+        reader.onloadend = () => {
+            const base64String = reader.result;
+            setImage(URL.createObjectURL(file)); // Keep track of image URL
+            setBase64Image(base64String); // Update base64 image state\
+
+            setQuestions((prevQuestions) => {
+                const selectedQuestionIndex = prevQuestions.findIndex(
+                    (question) => question.id === selectedQuestion.id,
+                );
+
+                if (selectedQuestionIndex === -1) return prevQuestions;
+
+                const newQuestions = [...prevQuestions];
+                const updatedQuestion = { ...newQuestions[selectedQuestionIndex], mediaUrl: base64String };
+                newQuestions[selectedQuestionIndex] = updatedQuestion;
+
+                return newQuestions;
+            });
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCheckboxChange = (index) => {
+        setAnswers((prevAnswers) => {
+            const newAnswers = [...prevAnswers];
+            newAnswers[index] = { ...newAnswers[index], isCorrect: !newAnswers[index].isCorrect };
+            return newAnswers;
+        });
+
+        updateQuestions();
+    };
+
+    const handleTimerChange = (e) => {
+        const newTimer = parseInt(e.target.value);
+        setTimer(newTimer);
+
+        updateQuestionsTimer({ timer: newTimer });
+    };
+
+    const updateQuestions = () => {
         setQuestions((prevQuestions) => {
             const selectedQuestionIndex = prevQuestions.findIndex((question) => question.id === selectedQuestion.id);
 
             if (selectedQuestionIndex === -1) return prevQuestions;
 
             const newQuestions = [...prevQuestions];
-            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], imageUrl: URL.createObjectURL(file) };
+            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], options: answers };
             newQuestions[selectedQuestionIndex] = updatedQuestion;
 
             return newQuestions;
         });
     };
 
-    const handleCheckboxChange = (index) => {
-        const currentIndex = correctAnswers.indexOf(index);
-        const newCorrectAnswers = [...correctAnswers];
-
-        if (currentIndex === -1) {
-            newCorrectAnswers.push(index);
-        } else {
-            newCorrectAnswers.splice(currentIndex, 1);
-        }
-
-        setCorrectAnswers(newCorrectAnswers);
-
+    const updateQuestionsTimer = (updatedFields) => {
         setQuestions((prevQuestions) => {
             const selectedQuestionIndex = prevQuestions.findIndex((question) => question.id === selectedQuestion.id);
 
             if (selectedQuestionIndex === -1) return prevQuestions;
 
             const newQuestions = [...prevQuestions];
-            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], correctAnswers: newCorrectAnswers };
+            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], ...updatedFields };
             newQuestions[selectedQuestionIndex] = updatedQuestion;
 
             return newQuestions;
@@ -100,8 +143,8 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
     useEffect(() => {
         setContent(selectedQuestion.content);
         setImage(selectedQuestion.imageUrl);
-        setAnswers(selectedQuestion.answers);
-        setCorrectAnswers(selectedQuestion.correctAnswers);
+        setAnswers(selectedQuestion.options);
+        setTimer(selectedQuestion.timer);
     }, [selectedQuestion]);
 
     return (
@@ -112,8 +155,8 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
                         <textarea
                             type="text"
                             placeholder="Start typing your explanation"
-                            onChange={handleInputContentChange}
-                            value={content}
+                            onChange={handleInputExplainChange}
+                            value={explain}
                             rows="4"
                             className={cx('question-title__input', 'question-title__input--large')}
                         />
@@ -152,33 +195,107 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
                             className={cx('question-title__input')}
                         />
                     </div>
-                    <div className={cx('question-image-wrapper')}>
-                        <input
-                            id="image-uploader"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            style={{ display: 'none' }}
-                            ref={fileInputRef}
-                        />
-                        <button
-                            className={cx('question-image__button')}
-                            onClick={(event) => handleInputButtonClick(event)}
-                        >
-                            <FontAwesomeIcon icon={faPlus} className={cx('question-image__icon')} />
-                        </button>
-                        {image ? (
-                            <img id="preview" className={cx('question-image__img')} src={image} alt="" />
-                        ) : (
-                            <div className={cx('question-image__img-background')}>No chosen image</div>
-                        )}
+                    <div className={cx('question-body')}>
+                        <div className={cx('question-image-wrapper')}>
+                            <input
+                                id="image-uploader"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                style={{ display: 'none' }}
+                                ref={fileInputRef}
+                            />
+                            <button
+                                className={cx('question-image__button')}
+                                onClick={(event) => handleInputButtonClick(event)}
+                            >
+                                <FontAwesomeIcon icon={faPlus} className={cx('question-image__icon')} />
+                            </button>
+                            {selectedQuestion.mediaUrl && !image && (
+                                <img
+                                    id="preview"
+                                    className={cx('question-image__img')}
+                                    src={selectedQuestion.mediaUrl}
+                                    alt=""
+                                />
+                            )}
+
+                            {image && <img id="preview" className={cx('question-image__img')} src={image} alt="" />}
+
+                            {!selectedQuestion.mediaUrl && !image && (
+                                <div className={cx('question-image__img-background')}>No chosen image</div>
+                            )}
+                        </div>
+                        <div className={cx('select')}>
+                            <div className={cx('selected')}>
+                                <p>
+                                    {timer == '15'
+                                        ? '15 seconds'
+                                        : timer == '30'
+                                        ? '30 seconds'
+                                        : timer == '60'
+                                        ? '1 minute'
+                                        : '2 minutes'}
+                                </p>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    height="1em"
+                                    viewBox="0 0 512 512"
+                                    className={cx('arrow')}
+                                >
+                                    <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path>
+                                </svg>
+                            </div>
+                            <div className={cx('options')}>
+                                <div>
+                                    <input
+                                        id="option-1"
+                                        type="radio"
+                                        value="15"
+                                        checked={timer == '15'}
+                                        onChange={handleTimerChange}
+                                    />
+                                    <label className={cx('option')} htmlFor="option-1" data-txt="15 seconds"></label>
+                                </div>
+                                <div>
+                                    <input
+                                        id="option-2"
+                                        type="radio"
+                                        value="30"
+                                        checked={timer == '30'}
+                                        onChange={handleTimerChange}
+                                    />
+                                    <label className={cx('option')} htmlFor="option-2" data-txt="30 seconds"></label>
+                                </div>
+                                <div>
+                                    <input
+                                        id="option-3"
+                                        type="radio"
+                                        value="60"
+                                        checked={timer == '60'}
+                                        onChange={handleTimerChange}
+                                    />
+                                    <label className={cx('option')} htmlFor="option-3" data-txt="1 minute"></label>
+                                </div>
+                                <div>
+                                    <input
+                                        id="option-4"
+                                        type="radio"
+                                        value="120"
+                                        checked={timer == '120'}
+                                        onChange={handleTimerChange}
+                                    />
+                                    <label className={cx('option')} htmlFor="option-4" data-txt="2 minutes"></label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div className={cx('answer-container')}>
                         {answers.map((answer, index) => (
                             <div key={index} className={cx('answer-item')}>
                                 <textarea
                                     rows="2"
-                                    value={answer}
+                                    value={answer.content}
                                     onChange={(e) => handleAnswerChange(index, e.target.value)}
                                     className={cx('answer-item__input')}
                                 />
@@ -186,7 +303,7 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
                                     <input
                                         id={`_checkbox-${index}`}
                                         type="checkbox"
-                                        checked={correctAnswers.includes(index)}
+                                        checked={answer.isCorrect}
                                         onChange={() => handleCheckboxChange(index)}
                                     />
                                     <label htmlFor={`_checkbox-${index}`}>

@@ -22,12 +22,28 @@ function CQSidebar({ questions, setQuestions, selectedQuestion, setSelectedQuest
         const realQuestionsCount = countRealQuestions(questions);
         const newQuestion = {
             id: `question${questions.length + 1}`,
-            order: realQuestionsCount,
+            sortOrder: realQuestionsCount,
             content: '',
-            type: 'quiz',
-            answers: ['', '', '', ''],
-            correctAnswers: [0],
-            imageUrl: '',
+            mediaUrl: '',
+            options: [
+                {
+                    content: '',
+                    isCorrect: false,
+                },
+                {
+                    content: '',
+                    isCorrect: false,
+                },
+                {
+                    content: '',
+                    isCorrect: false,
+                },
+                {
+                    content: '',
+                    isCorrect: false,
+                },
+            ],
+            timer: '15',
         };
         setQuestions([...questions, newQuestion]);
     };
@@ -35,11 +51,10 @@ function CQSidebar({ questions, setQuestions, selectedQuestion, setSelectedQuest
     const handleAddExplanationClick = () => {
         const newQuestion = {
             id: `question${questions.length + 1}`,
-            content: '',
+            explanationContent: '',
+            explanationMediaUrl: '',
             type: 'exp',
-            answers: ['', '', '', ''],
-            correctAnswers: [0],
-            imageUrl: '',
+            options: [],
         };
         setQuestions([...questions, newQuestion]);
     };
@@ -54,7 +69,7 @@ function CQSidebar({ questions, setQuestions, selectedQuestion, setSelectedQuest
         // Duyệt qua mảng và cập nhật order chỉ đối với các phần tử có type khác 'exp'
         newQuestions.forEach((question) => {
             if (question.type !== 'exp') {
-                question.order = order;
+                question.sortOrder = order;
                 order++;
             }
         });
