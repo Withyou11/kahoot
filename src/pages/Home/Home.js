@@ -6,6 +6,9 @@ import homepage_pic from '~/assets/img/homepage_pic.png';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+
 import axios from 'axios';
 
 const cx = classNames.bind(styles);
@@ -60,6 +63,13 @@ function Homepage() {
                     {isSignedIn && (
                         <div className={cx('custom-input__wrapper')}>
                             <input type="text" placeholder="Enter room code" className={cx('custom-input')} />
+                            <button title="Create new quiz" className={cx('create-quiz-button')}>
+                                <FontAwesomeIcon
+                                    className={cx('plus-icon')}
+                                    onClick={() => navigate('create-questions')}
+                                    icon={faPlus}
+                                />
+                            </button>
                         </div>
                     )}
 
