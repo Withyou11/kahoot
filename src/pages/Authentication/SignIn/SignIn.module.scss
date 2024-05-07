@@ -100,19 +100,31 @@
     }
 
     &__button {
-        cursor: pointer;
         width: 100%;
         height: 100%;
         border-radius: 8px;
-        background: #4383f0;
+        background: #82858b;
         color: white;
         font-weight: 750;
         font-size: 1.6rem;
         border: none;
         margin-top: 30px;
 
-        &:hover {
-            opacity: 0.8;
+        &-active {
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            color: white;
+            font-weight: 750;
+            font-size: 1.6rem;
+            border: none;
+            margin-top: 30px;
+            background: #4383f0;
+
+            &:hover {
+                opacity: 0.8;
+            }
         }
     }
 }

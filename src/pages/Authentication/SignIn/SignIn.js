@@ -4,7 +4,7 @@ import styles from './SignIn.module.scss';
 import logo from '~/assets/img/logo.png';
 import signIn from '~/assets/img/sign_in.png';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,6 +22,8 @@ function SignIn() {
 
     const [errorMessageForEmail, setErrorMessageForEmail] = useState('');
     const [errorMessageForPassword, setErrorMessageForPassword] = useState('');
+
+    const [isActiveSignInButton, setIsActiveSignInButton] = useState(false);
 
     const changeVisiblePassword = () => {
         setVisiblePassword(!visiblePassword);
@@ -79,6 +81,20 @@ function SignIn() {
         }
     };
 
+    const handlePressKey = async (e) => {
+        if (e.key === 'Enter') {
+            await handleSignIn();
+        }
+    };
+
+    useEffect(() => {
+        if (errorMessageForEmail === '' && errorMessageForPassword === '') {
+            setIsActiveSignInButton(true);
+        } else {
+            setIsActiveSignInButton(false);
+        }
+    }, [errorMessageForEmail, errorMessageForPassword]);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('sign-in-content')}>
@@ -95,6 +111,7 @@ function SignIn() {
                             className={cx('custom-input')}
                             value={email}
                             onChange={(e) => handleChangeEmail(e)}
+                            onKeyDown={handlePressKey}
                         />
                     </div>
                     {errorMessageForEmail && (
@@ -111,6 +128,7 @@ function SignIn() {
                             className={cx('custom-input')}
                             value={password}
                             onChange={(e) => handleChangePassword(e)}
+                            onKeyDown={handlePressKey}
                         />
                         <FontAwesomeIcon
                             className={cx('eye-slash-icon')}
@@ -125,7 +143,12 @@ function SignIn() {
                     )}
 
                     <div className={cx('custom-input__wrapper')}>
-                        <button onClick={handleSignIn} className={cx('custom-input__button')}>
+                        <button
+                            onClick={() => {
+                                if (isActiveSignInButton) handleSignIn();
+                            }}
+                            className={cx(`custom-input__button${isActiveSignInButton ? '-active' : ''}`)}
+                        >
                             Sign In
                         </button>
                     </div>

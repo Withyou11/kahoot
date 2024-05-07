@@ -30,11 +30,7 @@ const DropdownMenu = ({ firstName, lastName, profilePic }) => {
                 <div className={cx('user-name')}>
                     {firstName} {lastName}
                 </div>
-                <img
-                    className={cx('user-avatar')}
-                    alt="user-avatar"
-                    src="https://noithatbinhminh.com.vn/wp-content/uploads/2022/08/anh-dep-40.jpg.webp"
-                />
+                <img className={cx('user-avatar')} alt="user-avatar" src={profilePic} />
             </div>
 
             <div className={cx('dropdown')} style={{ height: menuHeight }}>

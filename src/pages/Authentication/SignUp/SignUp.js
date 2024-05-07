@@ -145,6 +145,27 @@ function SignUp() {
         }
     };
 
+    const handlePressKeyToSignUp = async (e) => {
+        if (e.key === 'Enter') {
+            if (
+                errorMessageForEmail === '' &&
+                errorMessageForPassword === '' &&
+                errorMessageForConfirmPassword === '' &&
+                errorMessageForBirthday === ''
+            ) {
+                await handleSignUp();
+            }
+        }
+    };
+
+    const handlePressKeyToGoNext = (e) => {
+        if (e.key === 'Enter') {
+            if (errorMessageForFirstName === '' && errorMessageForLastName === '') {
+                handleClickNextButton();
+            }
+        }
+    };
+
     useEffect(() => {
         if (errorMessageForFirstName === '' && errorMessageForLastName === '') {
             setIsActiveNextButton(true);
@@ -210,6 +231,7 @@ function SignUp() {
                                 className={cx('custom-input')}
                                 value={email}
                                 onChange={(e) => handleChangeEmail(e)}
+                                onKeyDown={handlePressKeyToSignUp}
                             />
                         </div>
                         {errorMessageForEmail && (
@@ -226,6 +248,7 @@ function SignUp() {
                                 className={cx('custom-input')}
                                 value={password}
                                 onChange={(e) => handleChangePassword(e)}
+                                onKeyDown={handlePressKeyToSignUp}
                             />
                             <FontAwesomeIcon
                                 className={cx('eye-slash-icon')}
@@ -247,6 +270,7 @@ function SignUp() {
                                 className={cx('custom-input')}
                                 value={confirmPassword}
                                 onChange={(e) => handleChangeConfirmPassword(e)}
+                                onKeyDown={handlePressKeyToSignUp}
                             />
                             <FontAwesomeIcon
                                 className={cx('eye-slash-icon')}
@@ -287,6 +311,7 @@ function SignUp() {
                                 className={cx('custom-input')}
                                 value={firstName}
                                 onChange={(e) => handleChangeFirstName(e)}
+                                onKeyDown={handlePressKeyToGoNext}
                             />
                         </div>
                         {errorMessageForFirstName && (
@@ -303,6 +328,7 @@ function SignUp() {
                                 className={cx('custom-input')}
                                 value={lastName}
                                 onChange={(e) => handleChangeLastName(e)}
+                                onKeyDown={handlePressKeyToGoNext}
                             />
                         </div>
                         {errorMessageForLastName && (
