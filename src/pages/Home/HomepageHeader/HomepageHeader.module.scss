@@ -9,12 +9,16 @@
     padding: 0 40px;
     display: flex;
     align-items: center;
-    align-content: space-around;
+    justify-content: space-between;
 }
 
 .logo-link {
     width: 150px;
     height: 100%;
+
+    &:hover {
+        opacity: 0.9;
+    }
 }
 
 .logo {
@@ -53,4 +57,9 @@
             background: rgba(242, 242, 242, 0);
         }
     }
+}
+
+.user-section {
+    width: 5%;
+    height: 70%;
 }
