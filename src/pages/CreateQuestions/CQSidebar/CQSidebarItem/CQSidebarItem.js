@@ -1,21 +1,43 @@
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import classNames from 'classnames/bind';
 import styles from './CQSidebarItem.module.scss';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
+import { QuizzesContext } from '~/Context/QuizzesContext/QuizzesContext';
+
 const cx = classNames.bind(styles);
 
 function CQSidebarItem({ question, index, questions, setQuestions, selectedQuestion, setSelectedQuestion }) {
-    const handleDeleteClick = () => {
-        const newQuestions = [...questions];
-        newQuestions.splice(index, 1);
-        setQuestions(newQuestions);
-    };
+    const quizzesContext = useContext(QuizzesContext);
+    const deletedQuestionIds = quizzesContext.deletedQuestionIds;
+    const setDeletedQuestionIds = quizzesContext.setDeletedQuestionIds;
 
-    console.log(selectedQuestion);
+    const handleDeleteClick = () => {
+        const warningMessage =
+            question.type === 'exp'
+                ? 'Are you sure you want to delete this explanation?'
+                : 'Are you sure you want to delete this question?';
+        if (window.confirm(warningMessage)) {
+            const newQuestions = [...questions];
+            newQuestions.splice(index, 1);
+
+            // Recalculate sortOrder
+            let order = 1;
+            newQuestions.forEach((q) => {
+                if (q.type !== 'exp') {
+                    q.sortOrder = order++;
+                }
+            });
+
+            setQuestions(newQuestions);
+            if (!deletedQuestionIds.includes(question.id)) {
+                setDeletedQuestionIds((oldArray) => [...oldArray, question.id]);
+            }
+        }
+    };
 
     const handleChangeQuestion = () => {
         setSelectedQuestion(question);

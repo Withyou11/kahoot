@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import classNames from 'classnames/bind';
 import styles from './CreateQuestions.module.scss';
@@ -7,11 +7,13 @@ import CreateQuestionsHeader from '~/components/CreateQuestionsHeader/CreateQues
 import QuestionContent from './QuestionContent/QuestionContent';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import Loading from '~/components/Loading/Loading';
 
 const cx = classNames.bind(styles);
 
 function CreateQuestion() {
     let { id } = useParams();
+
     const [loading, setLoading] = useState(true);
 
     const [questions, setQuestions] = useState([]);
@@ -19,19 +21,21 @@ function CreateQuestion() {
     const [quizInfo, setQuizInfo] = useState({ title: '', description: '', coverPicture: '' });
 
     useEffect(() => {
+        const accessToken = localStorage.getItem('accessToken');
+
         let tempIdCounter = 1;
         if (id) {
             axios
                 .get(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, {
                     headers: {
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDIwNTc0NywiZXhwIjoxNzE2Nzk3NzQ3fQ.LFFHvwQWuWokTwvJ3fKfSL1slCo48oyWvGxgkDkP-Fs`,
+                        Authorization: `Bearer ${accessToken}`,
                     },
                 })
                 .then((res) => {
                     const newDataFormat = res.data.data.questions.flatMap((question, index) => [
                         {
-                            id: `question${tempIdCounter++}`,
-                            quizId: question.quizId,
+                            idfake: `question${tempIdCounter++}`,
+                            id: question.id,
                             content: question.content,
                             sortOrder: question.sortOrder,
                             mediaUrl: question.mediaUrl,
@@ -64,7 +68,8 @@ function CreateQuestion() {
             setLoading(false);
             setQuestions([
                 {
-                    id: `question${questions.length + 1}`,
+                    idfake: `question${tempIdCounter}`,
+                    id: `1`,
                     sortOrder: 1,
                     content: '',
                     mediaUrl: '',
@@ -90,7 +95,8 @@ function CreateQuestion() {
                 },
             ]);
             setSelectedQuestion({
-                id: `question${questions.length + 1}`,
+                idfake: `question${tempIdCounter}`,
+                id: `1`,
                 sortOrder: 1,
                 content: '',
                 options: [
@@ -118,14 +124,7 @@ function CreateQuestion() {
 
     return (
         <div className={cx('wrapper')}>
-            {loading && (
-                <div className={cx('loading-wave')}>
-                    <div className={cx('loading-bar')}></div>
-                    <div className={cx('loading-bar')}></div>
-                    <div className={cx('loading-bar')}></div>
-                    <div className={cx('loading-bar')}></div>
-                </div>
-            )}
+            {loading && <Loading />}
             {!loading && (
                 <>
                     <CreateQuestionsHeader

@@ -21,6 +21,7 @@ function CQSidebar({ questions, setQuestions, selectedQuestion, setSelectedQuest
     const handleAddQuestionClick = () => {
         const realQuestionsCount = countRealQuestions(questions);
         const newQuestion = {
+            idfake: `question${questions.length + 1}`,
             id: `question${questions.length + 1}`,
             sortOrder: realQuestionsCount,
             content: '',

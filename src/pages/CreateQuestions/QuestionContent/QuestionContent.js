@@ -1,14 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 
 import classNames from 'classnames/bind';
 import styles from './QuestionContent.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
+import { useQuizContext, handleSetUpdatedQuestions } from '~/utils/quizUtils';
+
+// import { QuizzesContext } from '~/Context/QuizzesContext/QuizzesContext';
+
+import { useDebounce } from '~/hooks';
+
 const cx = classNames.bind(styles);
 
 function QuestionContent({ selectedQuestion, setQuestions }) {
-    console.log(selectedQuestion);
+    const { updatedQuestions, setUpdatedQuestions } = useQuizContext();
+
     const fileInputRef = useRef(null);
     const [content, setContent] = useState(selectedQuestion.content);
     const [answers, setAnswers] = useState(selectedQuestion.options);
@@ -19,13 +26,48 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
     const [image, setImage] = useState(selectedQuestion.mediaUrl);
     const [base64Image, setBase64Image] = useState(null);
 
-    const handleInputButtonClick = (event) => {
-        event.preventDefault();
-        fileInputRef.current.click();
-    };
+    const isMounted = useRef(false);
+    const debouncedContent = useDebounce(content, 600);
+
+    useEffect(() => {
+        if (isMounted.current) {
+            // This effect will execute when debouncedContent changes after 600ms of user inactivity
+            handleSetUpdatedQuestions(
+                selectedQuestion,
+                'content',
+                debouncedContent,
+                updatedQuestions,
+                setUpdatedQuestions,
+            );
+        } else {
+            isMounted.current = true; // Set isMounted to true after initial render
+        }
+    }, [debouncedContent]);
+
+    // const handleSetUpdatedQuestions = (key, value) => {
+    //     const updatingQuestionIndex = updatedQuestions.findIndex((question) => question.id === selectedQuestion.id);
+    //     if (updatingQuestionIndex === -1) {
+    //         const updatingQuestionData = {
+    //             id: selectedQuestion.id,
+    //             [key]: value,
+    //         };
+
+    //         setUpdatedQuestions((prev) => [...prev, updatingQuestionData]);
+    //     } else {
+    //         const tempUpdatedQuestions = [...updatedQuestions];
+    //         tempUpdatedQuestions[updatingQuestionIndex] = {
+    //             ...tempUpdatedQuestions[updatingQuestionIndex],
+    //             [key]: value,
+    //         };
+
+    //         setUpdatedQuestions(tempUpdatedQuestions);
+    //     }
+    // };
 
     const handleInputContentChange = (event) => {
         setContent(event.target.value);
+
+        // handleSetUpdatedQuestions('content', event.target.value);
 
         setQuestions((prevQuestions) => {
             const selectedQuestionIndex = prevQuestions.findIndex((question) => question.id === selectedQuestion.id);
@@ -38,6 +80,11 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
 
             return newQuestions;
         });
+    };
+
+    const handleInputButtonClick = (event) => {
+        event.preventDefault();
+        fileInputRef.current.click();
     };
 
     const handleInputExplainChange = (event) => {
@@ -57,13 +104,15 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
     };
 
     const handleAnswerChange = (index, value) => {
+        let answerTemp;
         setAnswers((prevAnswers) => {
             const newAnswers = [...prevAnswers];
             newAnswers[index] = { ...newAnswers[index], content: value };
+            answerTemp = newAnswers;
             return newAnswers;
         });
 
-        updateQuestions();
+        updateQuestions(answerTemp);
     };
 
     const handleImageChange = (event) => {
@@ -96,32 +145,35 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
     };
 
     const handleCheckboxChange = (index) => {
+        let answerTemp;
         setAnswers((prevAnswers) => {
             const newAnswers = [...prevAnswers];
             newAnswers[index] = { ...newAnswers[index], isCorrect: !newAnswers[index].isCorrect };
+            answerTemp = newAnswers;
             return newAnswers;
         });
 
-        updateQuestions();
+        updateQuestions(answerTemp);
     };
 
     const handleTimerChange = (e) => {
         const newTimer = parseInt(e.target.value);
+        handleSetUpdatedQuestions('timer', newTimer);
         setTimer(newTimer);
 
         updateQuestionsTimer({ timer: newTimer });
     };
 
-    const updateQuestions = () => {
+    const updateQuestions = (answerTemp) => {
         setQuestions((prevQuestions) => {
             const selectedQuestionIndex = prevQuestions.findIndex((question) => question.id === selectedQuestion.id);
 
             if (selectedQuestionIndex === -1) return prevQuestions;
 
             const newQuestions = [...prevQuestions];
-            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], options: answers };
+            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], options: answerTemp };
             newQuestions[selectedQuestionIndex] = updatedQuestion;
-
+            console.log(newQuestions[selectedQuestionIndex].options);
             return newQuestions;
         });
     };

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Toast from '~/components/Toast/Toast';
 import logo from '~/assets/img/logo.png';
@@ -8,10 +8,17 @@ import styles from './CreateQuestionsHeader.module.scss';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
+import { QuizzesContext } from '~/Context/QuizzesContext/QuizzesContext';
+
 const cx = classNames.bind(styles);
 
 function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo }) {
     let { id } = useParams();
+
+    const quizzesContext = useContext(QuizzesContext);
+    const quizInfo1 = quizzesContext.quizInfo;
+    const updatedQuestions = quizzesContext.updatedQuestions;
+    const deletedQuestionIds = quizzesContext.deletedQuestionIds;
 
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
@@ -120,8 +127,17 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
         let lastNonExpQuestion = null;
 
         for (let i = 0; i < questions.length; i++) {
-            const { id, ...rest } = questions[i]; // Destructuring để lấy tất cả các thuộc tính của question trừ id
-            const questionWithoutId = { ...rest }; // Tạo một bản sao của đối tượng question chỉ chứa các thuộc tính khác trừ id
+            const { id, quizId, ...rest } = questions[i]; // Lấy tất cả các thuộc tính của question trừ id
+            let questionWithoutId = { ...rest }; // Tạo một bản sao của đối tượng question chỉ chứa các thuộc tính khác trừ id
+
+            const { options, ...res } = questions[i];
+            const modifyOptions = options.map(({ questionId, id, ...option }) => option);
+            questionWithoutId = { ...rest, options: modifyOptions };
+
+            // Ép kiểu dữ liệu cho sortOrder và timer thành số nguyên
+            questionWithoutId.sortOrder = parseInt(questionWithoutId.sortOrder);
+            questionWithoutId.timer = parseInt(questionWithoutId.timer);
+
             if (questionWithoutId.type === 'exp' && lastNonExpQuestion !== null) {
                 lastNonExpQuestion.explanationContent = questionWithoutId.explanationContent;
                 lastNonExpQuestion.explanationMediaUrl = questionWithoutId.explanationMediaUrl;
@@ -159,7 +175,7 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
 
             if (!hasNonExpQuestion) {
                 questions.forEach((question, index) => {
-                    if (question.content.trim() === '') {
+                    if (question.content?.trim() === '') {
                         hasEmptyContent = true;
                         invalidQuestions.push(`Question ${index + 1}`);
                     }
@@ -200,12 +216,13 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
             } else {
                 const preparedData = prepareQuestionsForAPI(questions);
                 console.log(preparedData);
-                if (id) {
-                    // Call API update
-                } else {
-                    // Call API create
-                    callAPICreate(preparedData);
-                }
+                console.log('updatedQuestions: ', updatedQuestions);
+                console.log('deletedQuestionIds: ', deletedQuestionIds);
+                // if (id) {
+                //     callAPIUpdate(preparedData);
+                // } else {
+                //     callAPICreate(preparedData);
+                // }
                 // setShowAddnewQuestionToast(true);
             }
         } else {
@@ -215,11 +232,10 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
 
     function callAPIUpdate(data) {
         axios
-            .patch(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, {
+            .patch(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, data, {
                 headers: {
                     Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDIwNTc0NywiZXhwIjoxNzE2Nzk3NzQ3fQ.LFFHvwQWuWokTwvJ3fKfSL1slCo48oyWvGxgkDkP-Fs`,
                 },
-                body: data,
             })
             .then((res) => {
                 navigate('/manage-quizzes');
