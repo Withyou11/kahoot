@@ -42,6 +42,9 @@ function Homepage() {
                         setLastName(res?.data?.lastName);
                         setProfilePic(res?.data?.profilePicture);
                     }
+                })
+                .catch((e) => {
+                    console.log(e);
                 });
         }
     }, []);
@@ -66,7 +69,7 @@ function Homepage() {
                             <button title="Create new quiz" className={cx('create-quiz-button')}>
                                 <FontAwesomeIcon
                                     className={cx('plus-icon')}
-                                    onClick={() => navigate('create-questions')}
+                                    onClick={() => navigate('create-quiz')}
                                     icon={faPlus}
                                 />
                             </button>

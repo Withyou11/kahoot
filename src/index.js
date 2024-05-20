@@ -4,13 +4,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import GridSystem from './components/GridSystem';
 import GlobalStyles from '~/components/GlobalStyles';
+import { QuizzesProvider } from './Context/QuizzesContext/QuizzesContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // <React.StrictMode>
     <GridSystem>
         <GlobalStyles>
-            <App />
+            <QuizzesProvider>
+                <App />
+            </QuizzesProvider>
         </GlobalStyles>
     </GridSystem>,
     // </React.StrictMode>
