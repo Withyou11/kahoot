@@ -15,6 +15,7 @@ const cx = classNames.bind(styles);
 function Homepage() {
     const navigate = useNavigate();
     const [isSignedIn, setIsSignedIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const navigateToGamePage = () => {
         navigate(isSignedIn ? '/' : '/sign-in');
@@ -75,7 +76,7 @@ function Homepage() {
 
                     <div className={cx('custom-input__wrapper')}>
                         <button onClick={navigateToGamePage} className={cx('custom-input__button')}>
-                            {isSignedIn ? 'Join to the game 🡢' : 'Get started for free 🡢'}
+                            {isSignedIn ? 'Join to the game' : 'Get started for free'}
                         </button>
                     </div>
                 </div>
