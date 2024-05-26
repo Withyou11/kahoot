@@ -3,9 +3,26 @@ import { QuizzesContext } from '~/Context/QuizzesContext/QuizzesContext';
 
 export const useQuizContext = () => {
     const quizzesContext = useContext(QuizzesContext);
-    const { quizInfo, setQuizInfo, updatedQuestions, setUpdatedQuestions, deletedQuestionIds, setDeletedQuestionIds } =
-        quizzesContext;
-    return { quizInfo, setQuizInfo, updatedQuestions, setUpdatedQuestions, deletedQuestionIds, setDeletedQuestionIds };
+    const {
+        quizInfo,
+        setQuizInfo,
+        updatedQuestions,
+        setUpdatedQuestions,
+        deletedQuestionIds,
+        setDeletedQuestionIds,
+        newQuestions,
+        setNewQuestions,
+    } = quizzesContext;
+    return {
+        quizInfo,
+        setQuizInfo,
+        updatedQuestions,
+        setUpdatedQuestions,
+        deletedQuestionIds,
+        setDeletedQuestionIds,
+        newQuestions,
+        setNewQuestions,
+    };
 };
 
 export const handleSetUpdatedQuestions = (selectedQuestion, key, value, updatedQuestions, setUpdatedQuestions) => {

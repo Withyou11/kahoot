@@ -6,6 +6,7 @@ function QuizzesProvider({ children }) {
     const [updatedQuestions, setUpdatedQuestions] = useState([]);
     const [deletedQuestionIds, setDeletedQuestionIds] = useState([]);
     const [quizInfo, setQuizInfo] = useState({});
+    const [newQuestions, setNewQuestions] = useState([]);
 
     const value = {
         quizInfo,
@@ -14,6 +15,8 @@ function QuizzesProvider({ children }) {
         setUpdatedQuestions,
         deletedQuestionIds,
         setDeletedQuestionIds,
+        newQuestions,
+        setNewQuestions,
     };
 
     return <QuizzesContext.Provider value={value}>{children}</QuizzesContext.Provider>;

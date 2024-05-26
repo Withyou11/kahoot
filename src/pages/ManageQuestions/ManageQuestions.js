@@ -21,6 +21,7 @@ function ManageQuestions() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
+    const [id, setId] = useState('');
 
     const navigate = useNavigate();
 
@@ -33,7 +34,7 @@ function ManageQuestions() {
 
         if (accessToken) {
             axios
-                .get(`https://quiz-lab-server.onrender.com/api/users/my-info `, {
+                .get(`https://quiz-lab-server.onrender.com/api/users/my-info`, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
@@ -41,9 +42,11 @@ function ManageQuestions() {
                 .then((res) => {
                     const resStatus = res?.status;
                     if (resStatus === 200) {
+                        console.log(res.data);
                         setFirstName(res?.data?.firstName);
                         setLastName(res?.data?.lastName);
                         setProfilePic(res?.data?.profilePicture);
+                        setId(res?.data?.id);
                         setLoading1(false);
                     }
                 })
@@ -53,7 +56,7 @@ function ManageQuestions() {
         }
 
         axios
-            .get(`https://quiz-lab-server.onrender.com/api/quizzes?page=1&take=100&userId=3`, {
+            .get(`https://quiz-lab-server.onrender.com/api/quizzes?page=1&take=100&userId=${id}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },

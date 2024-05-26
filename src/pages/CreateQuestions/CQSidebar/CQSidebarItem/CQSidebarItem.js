@@ -67,8 +67,8 @@ function CQSidebarItem({ question, index, questions, setQuestions, selectedQuest
                             <p className={cx('question-summary__content')}>Explanation</p>
                         )}
 
-                        {question.mediaUrl ? (
-                            <img src={question.mediaUrl} className={cx('question-summary__img')} alt="" />
+                        {question.explanationMediaUrl ? (
+                            <img src={question.explanationMediaUrl} className={cx('question-summary__img')} alt="" />
                         ) : (
                             <div className={cx('question-summary__img-background')}>No chosen image</div>
                         )}
