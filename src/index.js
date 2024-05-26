@@ -5,15 +5,19 @@ import reportWebVitals from './reportWebVitals';
 import GridSystem from './components/GridSystem';
 import GlobalStyles from '~/components/GlobalStyles';
 import { QuizzesProvider } from './Context/QuizzesContext/QuizzesContext';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // <React.StrictMode>
     <GridSystem>
         <GlobalStyles>
-            <QuizzesProvider>
-                <App />
-            </QuizzesProvider>
+            <Provider store={store}>
+                <QuizzesProvider>
+                    <App />
+                </QuizzesProvider>
+            </Provider>
         </GlobalStyles>
     </GridSystem>,
     // </React.StrictMode>
