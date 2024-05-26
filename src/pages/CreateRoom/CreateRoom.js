@@ -14,7 +14,7 @@ function CreateRoom() {
     let { id } = useParams();
     const socket = io('https://quiz-lab-server.onrender.com');
 
-    const [roomCode, setRoomCode] = useState({});
+    const [roomCode, setRoomCode] = useState('');
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -29,7 +29,7 @@ function CreateRoom() {
 
     const handlePlayNow = () => {
         // Socket
-        socket.emit('startQuiz', roomCode);
+        socket.emit('startQuiz', { roomCode: roomCode });
         // Navigate or call API here
     };
 
@@ -65,7 +65,7 @@ function CreateRoom() {
                 })
                 .then((res) => {
                     console.log(res.data.data);
-                    setRoomCode({ roomCode: res.data.data.code });
+                    setRoomCode(res.data.data.code);
                     setLoading2(false);
                 })
                 .catch((e) => {
