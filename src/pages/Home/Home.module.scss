@@ -1,11 +1,20 @@
 .wrapper {
     width: 100%;
+    height: 100vh;
 
     // background
     background: #5571ec;
     background: linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
     background: -webkit-linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
     background: -moz-linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
+}
+
+.loading-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+
+    background-color: white;
 }
 
 .content {
