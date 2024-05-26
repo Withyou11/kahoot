@@ -14,7 +14,7 @@ function SetQuestionItem({ setQuestion }) {
 
     const handlePlay = (e, id) => {
         e.stopPropagation();
-        navigate(`/${id}`);
+        navigate(`/create-room/${id}`);
     };
     function formatTime(dateString) {
         // Parsing the string into a Date object
@@ -49,7 +49,7 @@ function SetQuestionItem({ setQuestion }) {
                         <button onClick={() => handleEdit(setQuestion.id)} className={cx('set-item__edit-btn')}>
                             Edit
                         </button>
-                        <button onClick={() => handlePlay(setQuestion.id)} className={cx('set-item__play-btn')}>
+                        <button onClick={(e) => handlePlay(e, setQuestion.id)} className={cx('set-item__play-btn')}>
                             Play
                         </button>
                     </div>

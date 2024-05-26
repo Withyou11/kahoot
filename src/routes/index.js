@@ -11,7 +11,7 @@ const publicRoutes = [
     { path: '/create-quiz', component: CreateQuestions },
     { path: '/edit-quiz/:id', component: CreateQuestions },
     { path: '/manage-quizzes', component: ManageQuestions },
-    { path: '/create-room', component: CreateRoom },
+    { path: '/create-room/:id', component: CreateRoom },
     { path: '/sign-in', component: SignIn },
     { path: '/sign-up', component: SignUp },
 ];

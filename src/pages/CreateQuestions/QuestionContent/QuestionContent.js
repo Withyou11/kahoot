@@ -1,15 +1,11 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import classNames from 'classnames/bind';
 import styles from './QuestionContent.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faRotate } from '@fortawesome/free-solid-svg-icons';
 
 import { useQuizContext, handleSetUpdatedQuestions } from '~/utils/quizUtils';
-
-// import { QuizzesContext } from '~/Context/QuizzesContext/QuizzesContext';
-
-import { useDebounce } from '~/hooks';
 
 const cx = classNames.bind(styles);
 
@@ -24,50 +20,21 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
     const [explain, setExplain] = useState(selectedQuestion.explanationContent);
 
     const [image, setImage] = useState(selectedQuestion.mediaUrl);
+    const [explainImage, setExplainImage] = useState(selectedQuestion.explanationMediaUrl);
     const [base64Image, setBase64Image] = useState(null);
-
-    const isMounted = useRef(false);
-    const debouncedContent = useDebounce(content, 600);
-
-    useEffect(() => {
-        if (isMounted.current) {
-            // This effect will execute when debouncedContent changes after 600ms of user inactivity
-            handleSetUpdatedQuestions(
-                selectedQuestion,
-                'content',
-                debouncedContent,
-                updatedQuestions,
-                setUpdatedQuestions,
-            );
-        } else {
-            isMounted.current = true; // Set isMounted to true after initial render
-        }
-    }, [debouncedContent]);
-
-    // const handleSetUpdatedQuestions = (key, value) => {
-    //     const updatingQuestionIndex = updatedQuestions.findIndex((question) => question.id === selectedQuestion.id);
-    //     if (updatingQuestionIndex === -1) {
-    //         const updatingQuestionData = {
-    //             id: selectedQuestion.id,
-    //             [key]: value,
-    //         };
-
-    //         setUpdatedQuestions((prev) => [...prev, updatingQuestionData]);
-    //     } else {
-    //         const tempUpdatedQuestions = [...updatedQuestions];
-    //         tempUpdatedQuestions[updatingQuestionIndex] = {
-    //             ...tempUpdatedQuestions[updatingQuestionIndex],
-    //             [key]: value,
-    //         };
-
-    //         setUpdatedQuestions(tempUpdatedQuestions);
-    //     }
-    // };
 
     const handleInputContentChange = (event) => {
         setContent(event.target.value);
 
-        // handleSetUpdatedQuestions('content', event.target.value);
+        if (!selectedQuestion.id.includes('question')) {
+            handleSetUpdatedQuestions(
+                selectedQuestion,
+                'content',
+                event.target.value,
+                updatedQuestions,
+                setUpdatedQuestions,
+            );
+        }
 
         setQuestions((prevQuestions) => {
             const selectedQuestionIndex = prevQuestions.findIndex((question) => question.id === selectedQuestion.id);
@@ -104,15 +71,12 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
     };
 
     const handleAnswerChange = (index, value) => {
-        let answerTemp;
         setAnswers((prevAnswers) => {
             const newAnswers = [...prevAnswers];
             newAnswers[index] = { ...newAnswers[index], content: value };
-            answerTemp = newAnswers;
             return newAnswers;
         });
-
-        updateQuestions(answerTemp);
+        updateQuestions();
     };
 
     const handleImageChange = (event) => {
@@ -121,7 +85,11 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
 
         reader.onloadend = () => {
             const base64String = reader.result;
-            setImage(URL.createObjectURL(file)); // Keep track of image URL
+            if (selectedQuestion.type !== 'exp') {
+                setImage(URL.createObjectURL(file));
+            } else {
+                setExplainImage(URL.createObjectURL(file));
+            }
             setBase64Image(base64String); // Update base64 image state\
 
             setQuestions((prevQuestions) => {
@@ -132,7 +100,12 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
                 if (selectedQuestionIndex === -1) return prevQuestions;
 
                 const newQuestions = [...prevQuestions];
-                const updatedQuestion = { ...newQuestions[selectedQuestionIndex], mediaUrl: base64String };
+                let updatedQuestion;
+                if (selectedQuestion.type !== 'exp') {
+                    updatedQuestion = { ...newQuestions[selectedQuestionIndex], mediaUrl: base64String };
+                } else {
+                    updatedQuestion = { ...newQuestions[selectedQuestionIndex], explanationMediaUrl: base64String };
+                }
                 newQuestions[selectedQuestionIndex] = updatedQuestion;
 
                 return newQuestions;
@@ -145,38 +118,51 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
     };
 
     const handleCheckboxChange = (index) => {
-        let answerTemp;
         setAnswers((prevAnswers) => {
             const newAnswers = [...prevAnswers];
             newAnswers[index] = { ...newAnswers[index], isCorrect: !newAnswers[index].isCorrect };
-            answerTemp = newAnswers;
             return newAnswers;
         });
 
-        updateQuestions(answerTemp);
+        updateQuestions();
     };
 
     const handleTimerChange = (e) => {
         const newTimer = parseInt(e.target.value);
-        handleSetUpdatedQuestions('timer', newTimer);
+        if (!selectedQuestion.id.includes('question')) {
+            handleSetUpdatedQuestions(selectedQuestion, 'timer', newTimer, updatedQuestions, setUpdatedQuestions);
+        }
         setTimer(newTimer);
 
         updateQuestionsTimer({ timer: newTimer });
     };
 
-    const updateQuestions = (answerTemp) => {
+    const updateQuestions = () => {
+        if (!selectedQuestion.id.includes('question')) {
+            const answersWithoutIds = answers.map(({ id, questionId, ...rest }) => rest);
+            handleSetUpdatedQuestions(
+                selectedQuestion,
+                'options',
+                answersWithoutIds,
+                updatedQuestions,
+                setUpdatedQuestions,
+            );
+        }
         setQuestions((prevQuestions) => {
             const selectedQuestionIndex = prevQuestions.findIndex((question) => question.id === selectedQuestion.id);
 
             if (selectedQuestionIndex === -1) return prevQuestions;
 
             const newQuestions = [...prevQuestions];
-            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], options: answerTemp };
+            const updatedQuestion = { ...newQuestions[selectedQuestionIndex], options: answers };
             newQuestions[selectedQuestionIndex] = updatedQuestion;
-            console.log(newQuestions[selectedQuestionIndex].options);
             return newQuestions;
         });
     };
+
+    useEffect(() => {
+        updateQuestions();
+    }, [answers]);
 
     const updateQuestionsTimer = (updatedFields) => {
         setQuestions((prevQuestions) => {
@@ -228,8 +214,8 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
                         >
                             <FontAwesomeIcon icon={faPlus} className={cx('question-image__icon')} />
                         </button>
-                        {image ? (
-                            <img id="preview" className={cx('question-image__img')} src={image} alt="" />
+                        {explainImage ? (
+                            <img id="preview" className={cx('question-image__img')} src={explainImage} alt="" />
                         ) : (
                             <div className={cx('question-image__img-background')}>No chosen image</div>
                         )}
@@ -261,7 +247,11 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
                                 className={cx('question-image__button')}
                                 onClick={(event) => handleInputButtonClick(event)}
                             >
-                                <FontAwesomeIcon icon={faPlus} className={cx('question-image__icon')} />
+                                {selectedQuestion.mediaUrl ? (
+                                    <FontAwesomeIcon icon={faRotate} className={cx('question-image__icon')} />
+                                ) : (
+                                    <FontAwesomeIcon icon={faPlus} className={cx('question-image__icon')} />
+                                )}
                             </button>
                             {selectedQuestion.mediaUrl && !image && (
                                 <img

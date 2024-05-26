@@ -43,7 +43,8 @@ function CreateQuestion() {
                             timer: question.timer,
                         },
                         {
-                            id: `question${tempIdCounter++}`,
+                            idfake: `question${tempIdCounter++}`,
+                            id: `e${question.id}`,
                             explanationContent: question.explanationContent,
                             explanationMediaUrl: question.explanationMediaUrl,
                             type: 'exp',

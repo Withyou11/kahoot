@@ -184,7 +184,7 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
 
             if (!hasEmptyContent) {
                 questions.forEach((question, index) => {
-                    if (question.type !== 'exp') {
+                    if (question.type != 'exp') {
                         if (!question.options.some((option) => option.isCorrect)) {
                             hasCorrectAnswer = true;
                             invalidQuestions.push(`Question ${index + 1}`);

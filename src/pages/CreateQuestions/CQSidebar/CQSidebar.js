@@ -1,6 +1,7 @@
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import CQSidebarItem from './CQSidebarItem/CQSidebarItem';
+import { useQuizContext, handleSetUpdatedQuestions } from '~/utils/quizUtils';
 
 import classNames from 'classnames/bind';
 import styles from './CQSidebar.module.scss';
@@ -8,6 +9,8 @@ import styles from './CQSidebar.module.scss';
 const cx = classNames.bind(styles);
 
 function CQSidebar({ questions, setQuestions, selectedQuestion, setSelectedQuestion }) {
+    const { updatedQuestions, setUpdatedQuestions } = useQuizContext();
+
     const countRealQuestions = (questions) => {
         let count = 1;
         for (const question of questions) {
@@ -60,24 +63,64 @@ function CQSidebar({ questions, setQuestions, selectedQuestion, setSelectedQuest
         setQuestions([...questions, newQuestion]);
     };
 
+    // const reorderQuestions = (startIndex, endIndex) => {
+    //     const newQuestions = Array.from(questions);
+    //     const [removed] = newQuestions.splice(startIndex, 1);
+    //     newQuestions.splice(endIndex, 0, removed);
+
+    //     let order = 1;
+
+    //     newQuestions.forEach((question) => {
+    //         if (question.type !== 'exp') {
+    //             question.sortOrder = order;
+    //             order++;
+    //         }
+    //     });
+
+    //     setQuestions(newQuestions);
+    // };
+
     const reorderQuestions = (startIndex, endIndex) => {
         const newQuestions = Array.from(questions);
         const [removed] = newQuestions.splice(startIndex, 1);
         newQuestions.splice(endIndex, 0, removed);
 
-        let order = 1; // Biến này sẽ được sử dụng để tính toán lại order của các phần tử
-
-        // Duyệt qua mảng và cập nhật order chỉ đối với các phần tử có type khác 'exp'
-        newQuestions.forEach((question) => {
+        let order = 1;
+        newQuestions.forEach((question, index) => {
             if (question.type !== 'exp') {
-                question.sortOrder = order;
-                order++;
+                const newSortOrder = order++;
+                if (question.sortOrder !== newSortOrder) {
+                    // Check if the question already exists in updatedQuestions
+                    const updatingQuestionIndex = updatedQuestions.findIndex((q) => q.id === question.id);
+                    if (updatingQuestionIndex === -1) {
+                        if (!question.id.includes('question')) {
+                            setUpdatedQuestions((prev) => [...prev, { id: question.id, sortOrder: newSortOrder }]);
+                        }
+                        // If it doesn't exist, push a new object with id and new sortOrder
+                    } else {
+                        // If it exists, check if it has sortOrder field and update or add it
+                        if (!question.id.includes('question')) {
+                            const tempUpdatedQuestions = [...updatedQuestions];
+                            if (tempUpdatedQuestions[updatingQuestionIndex].hasOwnProperty('sortOrder')) {
+                                tempUpdatedQuestions[updatingQuestionIndex].sortOrder = newSortOrder;
+                            } else {
+                                tempUpdatedQuestions[updatingQuestionIndex] = {
+                                    ...tempUpdatedQuestions[updatingQuestionIndex],
+                                    sortOrder: newSortOrder,
+                                };
+                            }
+                            setUpdatedQuestions(tempUpdatedQuestions);
+                        }
+                    }
+                }
+                question.sortOrder = newSortOrder;
             }
         });
 
-        // Cập nhật state
+        // Update state with the new questions order
         setQuestions(newQuestions);
     };
+
     const onDragEnd = (result) => {
         const { destination, source } = result;
 
