@@ -37,7 +37,7 @@ const DropdownMenu = ({ firstName, lastName, profilePic }) => {
                 <CSSTransition in={active === 'main'} unmountOnExit className={cx('menu-primary')} onEnter={calcHeight}>
                     <div className={cx('menu')}>
                         <DropdownItem goToPage={'my-profile'}>My Profile</DropdownItem>
-                        <DropdownItem goToPage={'my-quizzes'}>My Quizzes</DropdownItem>
+                        <DropdownItem goToPage={'manage-quizzes'}>My Quizzes</DropdownItem>
                         <DropdownItem goToPage={'my-history'}>Histories</DropdownItem>
                         <DropdownItem activateEvent={'sign-out'}>Sign out</DropdownItem>
                     </div>

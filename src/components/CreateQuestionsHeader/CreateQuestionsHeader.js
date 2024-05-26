@@ -1,21 +1,32 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Toast from '~/components/Toast/Toast';
 import logo from '~/assets/img/logo.png';
 
 import classNames from 'classnames/bind';
 import styles from './CreateQuestionsHeader.module.scss';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+
+import { QuizzesContext } from '~/Context/QuizzesContext/QuizzesContext';
 
 const cx = classNames.bind(styles);
 
-function CreateQuestionsHeader({ questions }) {
+function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo }) {
+    let { id } = useParams();
+
+    const quizzesContext = useContext(QuizzesContext);
+    const quizInfo1 = quizzesContext.quizInfo;
+    const updatedQuestions = quizzesContext.updatedQuestions;
+    const deletedQuestionIds = quizzesContext.deletedQuestionIds;
+
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
 
-    const [name, setName] = useState('');
-    const [savedname, setSavedName] = useState('');
-    const [desc, setDesc] = useState('');
-    const [savedDesc, setSavedDesc] = useState('');
+    const [name, setName] = useState(quizInfo.title);
+    const [savedname, setSavedName] = useState(quizInfo.title);
+    const [desc, setDesc] = useState(quizInfo.description);
+    const [savedDesc, setSavedDesc] = useState(quizInfo.description);
 
     const [base64Image, setBase64Image] = useState(null);
     const [coverImage, setCoverImage] = useState(null);
@@ -57,7 +68,14 @@ function CreateQuestionsHeader({ questions }) {
     };
 
     const handleImageChange = (event) => {
-        setCoverImage(event.target.files);
+        const file = event.target.files[0];
+        setCoverImage(file); // Update coverImage state with the file
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setBase64Image(reader.result); // Update base64Image state with the base64 representation of the image
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleSaveQuestionSetInfo = () => {
@@ -65,7 +83,12 @@ function CreateQuestionsHeader({ questions }) {
             setSavedName(name);
             setSavedDesc(desc);
             setShowModal(false);
-            setShowToast(true);
+            setQuizInfo({
+                title: name,
+                description: desc,
+                coverPicture: base64Image,
+            });
+            // setShowToast(true);
         } else {
             window.alert('Please fill in all required fields!');
         }
@@ -81,22 +104,57 @@ function CreateQuestionsHeader({ questions }) {
         }
     };
 
+    const handleDelete = () => {
+        if (window.confirm('Are you sure you want to delete this quiz?')) {
+            // Call api delete here
+            axios
+                .delete(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, {
+                    headers: {
+                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDIwNTc0NywiZXhwIjoxNzE2Nzk3NzQ3fQ.LFFHvwQWuWokTwvJ3fKfSL1slCo48oyWvGxgkDkP-Fs`,
+                    },
+                })
+                .then((res) => {
+                    navigate('/manage-quizzes');
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        }
+    };
+
     const prepareQuestionsForAPI = (questions) => {
         const preparedQuestions = [];
         let lastNonExpQuestion = null;
 
         for (let i = 0; i < questions.length; i++) {
-            const question = questions[i];
-            if (question.type === 'exp' && lastNonExpQuestion !== null) {
-                lastNonExpQuestion.explanationContent = question.content;
-                lastNonExpQuestion.explanationMediaUrl = question.imageUrl;
+            const { id, quizId, ...rest } = questions[i]; // Lấy tất cả các thuộc tính của question trừ id
+            let questionWithoutId = { ...rest }; // Tạo một bản sao của đối tượng question chỉ chứa các thuộc tính khác trừ id
+
+            const { options, ...res } = questions[i];
+            const modifyOptions = options.map(({ questionId, id, ...option }) => option);
+            questionWithoutId = { ...rest, options: modifyOptions };
+
+            // Ép kiểu dữ liệu cho sortOrder và timer thành số nguyên
+            questionWithoutId.sortOrder = parseInt(questionWithoutId.sortOrder);
+            questionWithoutId.timer = parseInt(questionWithoutId.timer);
+
+            if (questionWithoutId.type === 'exp' && lastNonExpQuestion !== null) {
+                lastNonExpQuestion.explanationContent = questionWithoutId.explanationContent;
+                lastNonExpQuestion.explanationMediaUrl = questionWithoutId.explanationMediaUrl;
             } else {
-                lastNonExpQuestion = { ...question }; // Tạo một bản sao của câu hỏi để tránh thay đổi trực tiếp vào mảng gốc
+                lastNonExpQuestion = { ...questionWithoutId };
                 preparedQuestions.push(lastNonExpQuestion);
             }
         }
 
-        return preparedQuestions;
+        const preparedQuiz = {
+            title: quizInfo.title,
+            description: quizInfo.description,
+            coverPicture: quizInfo.coverPicture,
+            questions: preparedQuestions,
+        };
+
+        return preparedQuiz;
     };
 
     const handleSaveQuestionSet = () => {
@@ -117,7 +175,7 @@ function CreateQuestionsHeader({ questions }) {
 
             if (!hasNonExpQuestion) {
                 questions.forEach((question, index) => {
-                    if (question.content.trim() === '') {
+                    if (question.content?.trim() === '') {
                         hasEmptyContent = true;
                         invalidQuestions.push(`Question ${index + 1}`);
                     }
@@ -127,11 +185,11 @@ function CreateQuestionsHeader({ questions }) {
             if (!hasEmptyContent) {
                 questions.forEach((question, index) => {
                     if (question.type !== 'exp') {
-                        if (question.correctAnswers.length === 0) {
+                        if (!question.options.some((option) => option.isCorrect)) {
                             hasCorrectAnswer = true;
                             invalidQuestions.push(`Question ${index + 1}`);
                         }
-                        if (question.answers.some((answer) => answer.trim() === '')) {
+                        if (question.options.some((option) => option.content.trim() === '')) {
                             hasEmptyAnswer = true;
                             invalidQuestions.push(`Question ${index + 1}`);
                         }
@@ -156,26 +214,61 @@ function CreateQuestionsHeader({ questions }) {
                         invalidQuestions.join(', '),
                 );
             } else {
-                const preparedQuestions = prepareQuestionsForAPI(questions);
-                console.log(preparedQuestions);
-                setShowAddnewQuestionToast(true);
+                const preparedData = prepareQuestionsForAPI(questions);
+                console.log(preparedData);
+                console.log('updatedQuestions: ', updatedQuestions);
+                console.log('deletedQuestionIds: ', deletedQuestionIds);
+                // if (id) {
+                //     callAPIUpdate(preparedData);
+                // } else {
+                //     callAPICreate(preparedData);
+                // }
+                // setShowAddnewQuestionToast(true);
             }
         } else {
             window.alert('Please enter title of question set!');
         }
     };
 
-    useEffect(() => {
-        if (coverImage) {
-            const reader = new FileReader();
-            const file = coverImage[0];
+    function callAPIUpdate(data) {
+        axios
+            .patch(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, data, {
+                headers: {
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDIwNTc0NywiZXhwIjoxNzE2Nzk3NzQ3fQ.LFFHvwQWuWokTwvJ3fKfSL1slCo48oyWvGxgkDkP-Fs`,
+                },
+            })
+            .then((res) => {
+                navigate('/manage-quizzes');
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+    }
 
-            reader.onloadend = () => {
-                setBase64Image(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    }, [coverImage]);
+    function callAPICreate(data) {
+        axios
+            .post(`https://quiz-lab-server.onrender.com/api/quizzes`, data, {
+                headers: {
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDc5ODA3MiwiZXhwIjoxNzE3MzkwMDcyfQ.73oVQIfZjbKKkNE1w_KzWpPpzEEfutb5YNrmytdJzXg`,
+                },
+            })
+            .then((res) => {
+                navigate('/manage-quizzes');
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+    }
+
+    // useEffect(() => {
+    //     if (coverImage) {
+    //         const reader = new FileReader();
+    //         reader.onloadend = () => {
+    //             setBase64Image(reader.result); // Update base64Image state when coverImage changes
+    //         };
+    //         reader.readAsDataURL(coverImage);
+    //     }
+    // }, [coverImage]);
 
     return (
         <div className={cx('wrapper')}>
@@ -195,6 +288,11 @@ function CreateQuestionsHeader({ questions }) {
             </div>
 
             <div className={cx('action')}>
+                {id && (
+                    <button className={cx('action__btn', 'action__btn-delete')} onClick={handleDelete}>
+                        Delete
+                    </button>
+                )}
                 <button className={cx('action__btn', 'action__btn-exit')} onClick={handleGoHome}>
                     Exit
                 </button>
@@ -257,14 +355,23 @@ function CreateQuestionsHeader({ questions }) {
                                         >
                                             Change
                                         </button>
-                                        {coverImage ? (
+                                        {quizInfo.coverPicture && !coverImage && (
                                             <img
                                                 id="preview"
                                                 className={cx('cover-image__img')}
-                                                src={URL.createObjectURL(coverImage[0])}
+                                                src={quizInfo.coverPicture}
                                                 alt=""
                                             />
-                                        ) : (
+                                        )}
+                                        {coverImage && (
+                                            <img
+                                                id="preview"
+                                                className={cx('cover-image__img')}
+                                                src={URL.createObjectURL(coverImage)}
+                                                alt=""
+                                            />
+                                        )}
+                                        {!quizInfo.coverPicture && !coverImage && (
                                             <div className={cx('cover-image__background')}></div>
                                         )}
                                     </div>
