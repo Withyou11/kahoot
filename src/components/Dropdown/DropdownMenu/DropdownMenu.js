@@ -34,7 +34,13 @@ const DropdownMenu = ({ firstName, lastName, profilePic }) => {
             </div>
 
             <div className={cx('dropdown')} style={{ height: menuHeight }}>
-                <CSSTransition in={active === 'main'} unmountOnExit className={cx('menu-primary')} onEnter={calcHeight}>
+                <CSSTransition
+                    timeout={10}
+                    in={active === 'main'}
+                    unmountOnExit
+                    className={cx('menu-primary')}
+                    onEnter={calcHeight}
+                >
                     <div className={cx('menu')}>
                         <DropdownItem goToPage={'my-profile'}>My Profile</DropdownItem>
                         <DropdownItem goToPage={'manage-quizzes'}>My Quizzes</DropdownItem>
