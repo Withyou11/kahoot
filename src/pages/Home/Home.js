@@ -12,6 +12,8 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Loading from '~/components/Loading/Loading';
 
+import { io } from 'socket.io-client';
+
 const cx = classNames.bind(styles);
 function Homepage() {
     const navigate = useNavigate();
@@ -19,6 +21,10 @@ function Homepage() {
     const [isLoading, setIsLoading] = useState(true);
 
     const [roomCode, setRoomCode] = useState('');
+
+    const socket = io('https://quiz-lab-server.onrender.com', {
+        transports: ['websocket'],
+    });
 
     const navigateToGamePage = async () => {
         if (isSignedIn) {
@@ -42,6 +48,7 @@ function Homepage() {
                 );
 
                 if (res?.status === 201) {
+                    socket.emit('userConnected', { userId, roomCode });
                     navigate('/');
                 }
             } catch (error) {
@@ -52,6 +59,7 @@ function Homepage() {
         }
     };
 
+    const [userId, setUserId] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
@@ -70,6 +78,7 @@ function Homepage() {
                 .then((res) => {
                     const resStatus = res?.status;
                     if (resStatus === 200) {
+                        setUserId(res?.data?.id);
                         setFirstName(res?.data?.firstName);
                         setLastName(res?.data?.lastName);
                         setProfilePic(res?.data?.profilePicture);
