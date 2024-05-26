@@ -12,16 +12,54 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Loading from '~/components/Loading/Loading';
 
+import { io } from 'socket.io-client';
+
 const cx = classNames.bind(styles);
 function Homepage() {
     const navigate = useNavigate();
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const navigateToGamePage = () => {
-        navigate(isSignedIn ? '/' : '/sign-in');
+    const [roomCode, setRoomCode] = useState('');
+
+    const socket = io('https://quiz-lab-server.onrender.com', {
+        transports: ['websocket'],
+    });
+
+    const navigateToGamePage = async () => {
+        if (isSignedIn) {
+            if (!roomCode) {
+                alert('Room code cannot be empty!');
+            }
+
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+
+                const res = await axios.post(
+                    `https://quiz-lab-server.onrender.com/api/rooms/join-room`,
+                    {
+                        roomCode,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    },
+                );
+
+                if (res?.status === 201) {
+                    socket.emit('userConnected', { userId, roomCode });
+                    navigate('/');
+                }
+            } catch (error) {
+                alert('Room code is not correct!');
+            }
+        } else {
+            navigate('/sign-in');
+        }
     };
 
+    const [userId, setUserId] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
@@ -40,6 +78,7 @@ function Homepage() {
                 .then((res) => {
                     const resStatus = res?.status;
                     if (resStatus === 200) {
+                        setUserId(res?.data?.id);
                         setFirstName(res?.data?.firstName);
                         setLastName(res?.data?.lastName);
                         setProfilePic(res?.data?.profilePicture);
@@ -53,6 +92,18 @@ function Homepage() {
             setIsLoading(false);
         }
     }, []);
+
+    const handleChangeRoomCode = (e) => {
+        const currentRoomCode = e.target.value;
+
+        setRoomCode(currentRoomCode);
+    };
+
+    const handlePressKey = async (e) => {
+        if (e.key === 'Enter') {
+            await navigateToGamePage();
+        }
+    };
 
     return (
         <div className={cx('wrapper')}>
@@ -82,7 +133,14 @@ function Homepage() {
                         <div className={cx('joining-room')}>
                             {isSignedIn && (
                                 <div className={cx('custom-input__wrapper')}>
-                                    <input type="text" placeholder="Enter room code" className={cx('custom-input')} />
+                                    <input
+                                        type="text"
+                                        placeholder="Enter room code"
+                                        className={cx('custom-input')}
+                                        value={roomCode}
+                                        onChange={(e) => handleChangeRoomCode(e)}
+                                        onKeyDown={handlePressKey}
+                                    />
                                     <button title="Create new quiz" className={cx('create-quiz-button')}>
                                         <FontAwesomeIcon
                                             className={cx('plus-icon')}
