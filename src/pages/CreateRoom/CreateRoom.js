@@ -29,7 +29,7 @@ function CreateRoom() {
 
     const handlePlayNow = () => {
         // Socket
-        socket.emit('startQuiz', (roomCode) => {
+        socket.emit('startQuiz', ({ roomCode }) => {
             // Navigate here
         });
     };
