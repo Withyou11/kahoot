@@ -14,7 +14,7 @@ const DropdownItem = ({ goToPage, activateEvent, children }) => {
             switch (activateEvent) {
                 case 'sign-out':
                     localStorage.removeItem('accessToken');
-                    window.location.reload();
+                    navigate('/');
                     break;
                 default:
                     break;
