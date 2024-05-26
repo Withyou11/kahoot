@@ -12,16 +12,17 @@ const cx = classNames.bind(styles);
 
 function CreateRoom() {
     let { id } = useParams();
-    const socket = io('https://quiz-lab-server.onrender.com');
+    const socket = io('https://quiz-lab-server.onrender.com', {
+        transports: ['websocket'],
+    });
 
-    const [roomCode, setRoomCode] = useState('aCsjwOac');
+    const [roomCode, setRoomCode] = useState();
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
 
-    const [loading1, setLoading1] = useState(true);
-    const [loading2, setLoading2] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [participants, setParticipants] = useState([]);
     const data = {
         quizId: id,
@@ -29,9 +30,7 @@ function CreateRoom() {
 
     const handlePlayNow = () => {
         // Socket
-        socket.emit('startQuiz', ({ roomCode }) => {
-            // Navigate here
-        });
+        socket.emit('startQuiz', { roomCode: roomCode });
     };
 
     useEffect(() => {
@@ -47,27 +46,28 @@ function CreateRoom() {
                 .then((res) => {
                     const resStatus = res?.status;
                     if (resStatus === 200) {
-                        console.log(res.data);
                         setFirstName(res?.data?.firstName);
                         setLastName(res?.data?.lastName);
                         setProfilePic(res?.data?.profilePicture);
-                        setLoading1(false);
-                    }
-                })
-                .catch((e) => {
-                    console.log(e);
-                });
+                        axios
+                            .post(`https://quiz-lab-server.onrender.com/api/rooms`, data, {
+                                headers: {
+                                    Authorization: `Bearer ${accessToken}`,
+                                },
+                            })
+                            .then((response) => {
+                                setRoomCode(response?.data.data.code);
+                                socket.emit('userConnected', {
+                                    userId: res?.data?.id,
+                                    roomCode: response?.data.data.code,
+                                });
 
-            axios
-                .post(`https://quiz-lab-server.onrender.com/api/rooms`, data, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                })
-                .then((res) => {
-                    console.log(res.data.data);
-                    setRoomCode(res.data.data.code);
-                    setLoading2(false);
+                                setLoading(false);
+                            })
+                            .catch((e) => {
+                                console.log(e);
+                            });
+                    }
                 })
                 .catch((e) => {
                     console.log(e);
@@ -76,29 +76,25 @@ function CreateRoom() {
     }, []);
 
     useEffect(() => {
-        window.scrollTo(0, 0);
-        if (roomCode) {
-            socket.on('newUserConnected', (user) => {
-                console.log(user);
-                const newUser = {
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                };
-                setParticipants((prev) => [...prev, newUser]);
-            });
-        }
+        socket.on('newUserConnected', (user) => {
+            console.log(user);
+            const newUser = {
+                firstName: user?.user?.firstName,
+                lastName: user?.user?.lastName,
+            };
+            setParticipants((prev) => [...prev, newUser]);
+        });
     }, []);
 
     return (
         <div className={cx('wrapper')}>
-            {loading1 ||
-                (loading2 && (
-                    <div className={cx('loading-container')}>
-                        <Loading />
-                    </div>
-                ))}
+            {loading && (
+                <div className={cx('loading-container')}>
+                    <Loading />
+                </div>
+            )}
 
-            {!loading1 && !loading2 && (
+            {!loading && (
                 <div className={cx('container')}>
                     <HomepageHeader
                         firstName={firstName}
