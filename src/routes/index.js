@@ -4,6 +4,7 @@ import ManageQuestions from '~/pages/ManageQuestions/ManageQuestions';
 import CreateRoom from '~/pages/CreateRoom/CreateRoom';
 import SignIn from '~/pages/Authentication/SignIn/SignIn';
 import SignUp from '~/pages/Authentication/SignUp/SignUp';
+import History from '~/pages/History/History';
 
 // Public routes
 const publicRoutes = [
@@ -14,6 +15,7 @@ const publicRoutes = [
     { path: '/create-room/:id', component: CreateRoom },
     { path: '/sign-in', component: SignIn },
     { path: '/sign-up', component: SignUp },
+    { path: '/my-history', component: History },
 ];
 
 const privateRoutes = [];
