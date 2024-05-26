@@ -18,8 +18,38 @@ function Homepage() {
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const navigateToGamePage = () => {
-        navigate(isSignedIn ? '/' : '/sign-in');
+    const [roomCode, setRoomCode] = useState('');
+
+    const navigateToGamePage = async () => {
+        if (isSignedIn) {
+            if (!roomCode) {
+                alert('Room code cannot be empty!');
+            }
+
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+
+                const res = await axios.post(
+                    `https://quiz-lab-server.onrender.com/api/rooms/join-room`,
+                    {
+                        roomCode,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    },
+                );
+
+                if (res?.status === 201) {
+                    navigate('/');
+                }
+            } catch (error) {
+                alert('Room code is not correct!');
+            }
+        } else {
+            navigate('/sign-in');
+        }
     };
 
     const [firstName, setFirstName] = useState('');
@@ -54,6 +84,18 @@ function Homepage() {
         }
     }, []);
 
+    const handleChangeRoomCode = (e) => {
+        const currentRoomCode = e.target.value;
+
+        setRoomCode(currentRoomCode);
+    };
+
+    const handlePressKey = async (e) => {
+        if (e.key === 'Enter') {
+            await navigateToGamePage();
+        }
+    };
+
     return (
         <div className={cx('wrapper')}>
             {isLoading && (
@@ -82,7 +124,14 @@ function Homepage() {
                         <div className={cx('joining-room')}>
                             {isSignedIn && (
                                 <div className={cx('custom-input__wrapper')}>
-                                    <input type="text" placeholder="Enter room code" className={cx('custom-input')} />
+                                    <input
+                                        type="text"
+                                        placeholder="Enter room code"
+                                        className={cx('custom-input')}
+                                        value={roomCode}
+                                        onChange={(e) => handleChangeRoomCode(e)}
+                                        onKeyDown={handlePressKey}
+                                    />
                                     <button title="Create new quiz" className={cx('create-quiz-button')}>
                                         <FontAwesomeIcon
                                             className={cx('plus-icon')}
