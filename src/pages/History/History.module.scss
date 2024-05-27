@@ -1,6 +1,6 @@
 .wrapper {
     width: 100%;
-    height: calc(100vh);
+    min-height: calc(100vh);
     // background
     background: #5571ec;
     background: linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
@@ -10,4 +10,42 @@
     flex-direction: column;
     display: flex;
     flex-direction: column;
+}
+
+.tab {
+    &-container {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        height: 50px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+        margin-bottom: 30px;
+    }
+
+    &-item {
+        cursor: pointer;
+        border-radius: 10px;
+        &:hover p {
+            scale: 1.2;
+            color: #666;
+        }
+    }
+
+    &-title {
+        text-align: center;
+        font-size: 2rem;
+        line-height: 50px;
+        font-weight: 600;
+    }
+
+    &-active {
+        color: white;
+        background: #5275ed;
+        cursor: pointer;
+    }
+    &-inactive {
+        cursor: pointer;
+    }
 }
