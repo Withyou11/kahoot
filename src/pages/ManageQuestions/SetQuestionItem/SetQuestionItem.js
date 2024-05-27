@@ -58,7 +58,6 @@ function SetQuestionItem({ setQuestion }) {
                     ) : (
                         <p className={cx('set-item__time')}>Last update: {formatTime(setQuestion.createdAt)}</p>
                     )}
-                    {/* <p className={cx('set-item__time')}>Last update: {setQuestion.updatedAt}</p> */}
                 </div>
             </div>
         </div>

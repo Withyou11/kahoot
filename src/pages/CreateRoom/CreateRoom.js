@@ -22,7 +22,7 @@ function CreateRoom() {
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [participants, setParticipants] = useState([]);
     const data = {
         quizId: id,

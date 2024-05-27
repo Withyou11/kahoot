@@ -23,7 +23,7 @@ const DropdownItem = ({ goToPage, activateEvent, children }) => {
         }
 
         if (goToPage) {
-            navigate(goToPage);
+            navigate(`/${goToPage}`);
         }
     };
 
