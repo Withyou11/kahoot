@@ -11,7 +11,6 @@ const cx = classNames.bind(styles);
 
 function QuestionContent({ selectedQuestion, setQuestions }) {
     const { updatedQuestions, setUpdatedQuestions } = useQuizContext();
-
     const fileInputRef = useRef(null);
     const [content, setContent] = useState(selectedQuestion.content);
     const [answers, setAnswers] = useState(selectedQuestion.options);
@@ -68,6 +67,16 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
 
             return newQuestions;
         });
+
+        if (!selectedQuestion.id.includes('question')) {
+            handleSetUpdatedQuestions(
+                selectedQuestion,
+                'explanationContent',
+                event.target.value,
+                updatedQuestions,
+                setUpdatedQuestions,
+            );
+        }
     };
 
     const handleAnswerChange = (index, value) => {
@@ -90,7 +99,7 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
             } else {
                 setExplainImage(URL.createObjectURL(file));
             }
-            setBase64Image(base64String); // Update base64 image state\
+            setBase64Image(base64String);
 
             setQuestions((prevQuestions) => {
                 const selectedQuestionIndex = prevQuestions.findIndex(
@@ -110,6 +119,25 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
 
                 return newQuestions;
             });
+            if (!selectedQuestion.id.includes('question')) {
+                if (selectedQuestion.type !== 'exp') {
+                    handleSetUpdatedQuestions(
+                        selectedQuestion,
+                        'mediaUrl',
+                        base64String,
+                        updatedQuestions,
+                        setUpdatedQuestions,
+                    );
+                } else {
+                    handleSetUpdatedQuestions(
+                        selectedQuestion,
+                        'explanationMediaUrl',
+                        base64String,
+                        updatedQuestions,
+                        setUpdatedQuestions,
+                    );
+                }
+            }
         };
 
         if (file) {
@@ -180,6 +208,8 @@ function QuestionContent({ selectedQuestion, setQuestions }) {
 
     useEffect(() => {
         setContent(selectedQuestion.content);
+        setExplain(selectedQuestion.explanationContent ? selectedQuestion.explanationContent : ' ');
+        setExplainImage(selectedQuestion.explanationMediaUrl ? selectedQuestion.explanationMediaUrl : '');
         setImage(selectedQuestion.imageUrl);
         setAnswers(selectedQuestion.options);
         setTimer(selectedQuestion.timer);

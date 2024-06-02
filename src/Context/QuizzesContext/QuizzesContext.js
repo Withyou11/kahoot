@@ -5,7 +5,7 @@ const QuizzesContext = createContext();
 function QuizzesProvider({ children }) {
     const [updatedQuestions, setUpdatedQuestions] = useState([]);
     const [deletedQuestionIds, setDeletedQuestionIds] = useState([]);
-    const [quizInfo, setQuizInfo] = useState({});
+    const [quizInfo, setQuizInfo] = useState();
     const [newQuestions, setNewQuestions] = useState([]);
 
     const value = {

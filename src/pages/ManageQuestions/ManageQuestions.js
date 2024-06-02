@@ -21,7 +21,6 @@ function ManageQuestions() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
-    const [id, setId] = useState('');
 
     const navigate = useNavigate();
 
@@ -46,29 +45,30 @@ function ManageQuestions() {
                         setFirstName(res?.data?.firstName);
                         setLastName(res?.data?.lastName);
                         setProfilePic(res?.data?.profilePicture);
-                        setId(res?.data?.id);
                         setLoading1(false);
                     }
+                    axios
+                        .get(
+                            `https://quiz-lab-server.onrender.com/api/quizzes?page=1&take=100&userId=${res?.data?.id}`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${accessToken}`,
+                                },
+                            },
+                        )
+                        .then((response) => {
+                            console.log(response.data.data.data);
+                            setListQuizzes(response.data.data.data);
+                            setLoading2(false);
+                        })
+                        .catch((e) => {
+                            console.log(e);
+                        });
                 })
                 .catch((e) => {
                     console.log(e);
                 });
         }
-
-        axios
-            .get(`https://quiz-lab-server.onrender.com/api/quizzes?page=1&take=100&userId=${id}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            })
-            .then((res) => {
-                console.log(res.data.data.data);
-                setListQuizzes(res.data.data.data);
-                setLoading2(false);
-            })
-            .catch((e) => {
-                console.log(e);
-            });
     }, []);
 
     return (

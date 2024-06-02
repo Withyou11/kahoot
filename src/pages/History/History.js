@@ -54,7 +54,7 @@ function History() {
         const type = isPlayTab ? 'PLAYING' : 'ORGANIZING';
         if (accessToken) {
             axios
-                .get(`https://quiz-lab-server.onrender.com/api/users/my-history?page=1&take=10&historyType=${type}`, {
+                .get(`https://quiz-lab-server.onrender.com/api/users/my-history?page=1&take=100&historyType=${type}`, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
