@@ -40,6 +40,7 @@ function CQSidebarItem({ question, index, questions, setQuestions, selectedQuest
     };
 
     const handleChangeQuestion = () => {
+        console.log(question);
         setSelectedQuestion(question);
     };
 

@@ -35,6 +35,10 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
     const [showToast, setShowToast] = useState(false);
     const [showAddnewQuestionToast, setShowAddnewQuestionToast] = useState(false);
 
+    const [isTitleChange, setIsTitleChange] = useState(false);
+    const [isDescChange, setIsDescChange] = useState(false);
+    const [isCoverImageChange, setIsCoverImageChange] = useState(false);
+
     const handleInputButtonClick = (event) => {
         event.preventDefault();
         fileInputRef.current.click();
@@ -60,14 +64,17 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
     };
 
     const handleInputNameChange = (event) => {
+        setIsTitleChange(true);
         setName(event.target.value);
     };
 
     const handleInputDescChange = (event) => {
+        setIsDescChange(true);
         setDesc(event.target.value);
     };
 
     const handleImageChange = (event) => {
+        setIsCoverImageChange(true);
         const file = event.target.files[0];
         setCoverImage(file); // Update coverImage state with the file
 
@@ -106,23 +113,26 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
 
     const handleDelete = () => {
         if (window.confirm('Are you sure you want to delete this quiz?')) {
-            // Call api delete here
-            axios
-                .delete(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, {
-                    headers: {
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDIwNTc0NywiZXhwIjoxNzE2Nzk3NzQ3fQ.LFFHvwQWuWokTwvJ3fKfSL1slCo48oyWvGxgkDkP-Fs`,
-                    },
-                })
-                .then((res) => {
-                    navigate('/manage-quizzes');
-                })
-                .catch((e) => {
-                    console.log(e);
-                });
+            const accessToken = localStorage.getItem('accessToken');
+            if (accessToken) {
+                // Call api delete here
+                axios
+                    .delete(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    })
+                    .then((res) => {
+                        navigate('/manage-quizzes');
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    });
+            }
         }
     };
 
-    const prepareQuestionsForAPI = (questions) => {
+    const prepareQuestionsForCreate = (questions) => {
         const preparedQuestions = [];
         let lastNonExpQuestion = null;
 
@@ -155,6 +165,29 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
         };
 
         return preparedQuiz;
+    };
+
+    const prepareDataForUpdate = () => {
+        const preparedData = {};
+        if (isTitleChange) {
+            preparedData.title = savedname;
+        }
+        if (isDescChange) {
+            preparedData.description = savedDesc;
+        }
+        if (isCoverImageChange) {
+            preparedData.coverPicture = base64Image;
+            preparedData.isDeleteCoverPicture = true;
+        } else {
+            preparedData.isDeleteCoverPicture = false;
+        }
+        if (updatedQuestions.length > 0) {
+            preparedData.updatedQuestions = updatedQuestions;
+        }
+        if (deletedQuestionIds.length > 0) {
+            preparedData.deletedQuestionIds = deletedQuestionIds;
+        }
+        return preparedData;
     };
 
     const handleSaveQuestionSet = () => {
@@ -214,15 +247,16 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
                         invalidQuestions.join(', '),
                 );
             } else {
-                const preparedData = prepareQuestionsForAPI(questions);
-                console.log(preparedData);
-                console.log('updatedQuestions: ', updatedQuestions);
-                console.log('deletedQuestionIds: ', deletedQuestionIds);
-                // if (id) {
-                //     callAPIUpdate(preparedData);
-                // } else {
-                //     callAPICreate(preparedData);
-                // }
+                if (id) {
+                    console.log('updatedQuestions: ', updatedQuestions);
+                    console.log('deletedQuestionIds: ', deletedQuestionIds);
+                    const preparedData = prepareDataForUpdate();
+                    console.log(preparedData);
+                    // callAPIUpdate(preparedData);
+                } else {
+                    const preparedDataForCreate = prepareQuestionsForCreate(questions);
+                    callAPICreate(preparedDataForCreate);
+                }
                 // setShowAddnewQuestionToast(true);
             }
         } else {
@@ -246,18 +280,21 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
     }
 
     function callAPICreate(data) {
-        axios
-            .post(`https://quiz-lab-server.onrender.com/api/quizzes`, data, {
-                headers: {
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDc5ODA3MiwiZXhwIjoxNzE3MzkwMDcyfQ.73oVQIfZjbKKkNE1w_KzWpPpzEEfutb5YNrmytdJzXg`,
-                },
-            })
-            .then((res) => {
-                navigate('/manage-quizzes');
-            })
-            .catch((e) => {
-                console.log(e);
-            });
+        const accessToken = localStorage.getItem('accessToken');
+        if (accessToken) {
+            axios
+                .post(`https://quiz-lab-server.onrender.com/api/quizzes`, data, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                })
+                .then((res) => {
+                    navigate('/manage-quizzes');
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        }
     }
 
     // useEffect(() => {
@@ -305,7 +342,7 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
             {showModal && (
                 <div className={cx('modal')}>
                     <div className={cx('modal__content', 'modal__content--medium')}>
-                        <h2 className={cx('modal__heading')}>Question set summary</h2>
+                        <h2 className={cx('modal__heading')}>Quiz Info</h2>
                         <div className={cx('modal__row')}>
                             <div className={cx('input-group')}>
                                 <div className={cx('input-wrapper')}>

@@ -32,6 +32,7 @@ function CreateQuestion() {
                     },
                 })
                 .then((res) => {
+                    console.log(res.data.data);
                     const newDataFormat = res.data.data.questions.flatMap((question, index) => [
                         {
                             idfake: `question${tempIdCounter++}`,
