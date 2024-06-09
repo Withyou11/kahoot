@@ -111,3 +111,29 @@
     background: -webkit-linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
     background: -moz-linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
 }
+
+.scoreBoard {
+    display: flex;
+    flex-direction: row; // Changed from 'column' to 'row'
+    justify-content: center;
+    align-items: end;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.scoreItem {
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+    border-radius: 5px;
+    margin: 0 10px;
+    text-align: center;
+}
+
+.scoreIcon {
+    font-size: 24px;
+}
+
+.scoreNumber {
+    font-size: 24px;
+}

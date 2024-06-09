@@ -8,18 +8,24 @@ import { useNavigate } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import Modal from '~/components/Modal';
 
 import axios from 'axios';
 import Loading from '~/components/Loading/Loading';
 
 import { io } from 'socket.io-client';
+import { useDispatch } from 'react-redux';
+import { initialSocket } from '~/redux/socketSlide';
+import { initialUserInfo } from '~/redux/userSlide';
 
 const cx = classNames.bind(styles);
 function Homepage() {
     const navigate = useNavigate();
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
+    const [showModal, setShowModal] = useState(false);
+    const [questionId, setQuestionId] = useState();
+    const dispatch = useDispatch();
     const [roomCode, setRoomCode] = useState('');
 
     const socket = io('https://quiz-lab-server.onrender.com', {
@@ -49,7 +55,14 @@ function Homepage() {
 
                 if (res?.status === 201) {
                     socket.emit('userConnected', { userId, roomCode });
-                    navigate('/');
+                    const roomCodeHolder = roomCode;
+                    setShowModal(true);
+                    dispatch(initialSocket(socket));
+                    socket.on('startQuiz', ({ roomCode, totalQuestion }) => {
+                        console.log('room code after', roomCode);
+                        setShowModal(false);
+                        navigate(`/user-play/${roomCodeHolder}`, { state: { totalQuestion: totalQuestion } });
+                    });
                 }
             } catch (error) {
                 alert('Room code is not correct!');
@@ -82,6 +95,7 @@ function Homepage() {
                         setFirstName(res?.data?.firstName);
                         setLastName(res?.data?.lastName);
                         setProfilePic(res?.data?.profilePicture);
+                        dispatch(initialUserInfo(res?.data));
                         setIsLoading(false);
                     }
                 })
@@ -99,6 +113,17 @@ function Homepage() {
         setRoomCode(currentRoomCode);
     };
 
+    // useEffect(() => {
+    //     socket.on('newUserConnected', (user) => {
+    //         console.log(user);
+    //         const newUser = {
+    //             firstName: user?.user?.firstName,
+    //             lastName: user?.user?.lastName,
+    //         };
+    //         setParticipants((prev) => [...prev, newUser]);
+    //     });
+    // }, []);
+
     const handlePressKey = async (e) => {
         if (e.key === 'Enter') {
             await navigateToGamePage();
@@ -106,61 +131,70 @@ function Homepage() {
     };
 
     return (
-        <div className={cx('wrapper')}>
-            {isLoading && (
-                <div className={cx('loading-container')}>
-                    <Loading />
-                </div>
-            )}
-            {!isLoading && (
-                <div>
-                    <HomepageHeader
-                        firstName={firstName}
-                        lastName={lastName}
-                        profilePic={profilePic}
-                        isSignedIn={isSignedIn}
-                    />
-                    <div className={cx('content')}>
-                        <div className={cx('img-and-slogan')}>
-                            <img src={homepage_pic} alt="Homepage picture" className={cx('homepage_pic')} />
-                            <div className={cx('homepage_slogan')}>
-                                {isSignedIn && firstName ? `Welcome back, ${firstName}!` : `Let's play`}
+        <>
+            <div className={cx('wrapper')}>
+                {isLoading && (
+                    <div className={cx('loading-container')}>
+                        <Loading />
+                    </div>
+                )}
+                {!isLoading && (
+                    <div>
+                        <HomepageHeader
+                            firstName={firstName}
+                            lastName={lastName}
+                            profilePic={profilePic}
+                            isSignedIn={isSignedIn}
+                        />
+                        <div className={cx('content')}>
+                            <div className={cx('img-and-slogan')}>
+                                <img src={homepage_pic} alt="Homepage picture" className={cx('homepage_pic')} />
+                                <div className={cx('homepage_slogan')}>
+                                    {isSignedIn && firstName ? `Welcome back, ${firstName}!` : `Let's play`}
+                                </div>
+                                <div className={cx('homepage_text')}>
+                                    Do you feel confident? Here, you'll challenge one of the most difficult questions
+                                </div>
                             </div>
-                            <div className={cx('homepage_text')}>
-                                Do you feel confident? Here, you'll challenge one of the most difficult questions
-                            </div>
-                        </div>
-                        <div className={cx('joining-room')}>
-                            {isSignedIn && (
-                                <div className={cx('custom-input__wrapper')}>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter room code"
-                                        className={cx('custom-input')}
-                                        value={roomCode}
-                                        onChange={(e) => handleChangeRoomCode(e)}
-                                        onKeyDown={handlePressKey}
-                                    />
-                                    <button title="Create new quiz" className={cx('create-quiz-button')}>
-                                        <FontAwesomeIcon
-                                            className={cx('plus-icon')}
-                                            onClick={() => navigate('create-quiz')}
-                                            icon={faPlus}
+                            <div className={cx('joining-room')}>
+                                {isSignedIn && (
+                                    <div className={cx('custom-input__wrapper')}>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter room code"
+                                            className={cx('custom-input')}
+                                            value={roomCode}
+                                            onChange={(e) => handleChangeRoomCode(e)}
+                                            onKeyDown={handlePressKey}
                                         />
+                                        <button title="Create new quiz" className={cx('create-quiz-button')}>
+                                            <FontAwesomeIcon
+                                                className={cx('plus-icon')}
+                                                onClick={() => navigate('create-quiz')}
+                                                icon={faPlus}
+                                            />
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className={cx('custom-input__wrapper')}>
+                                    <button onClick={navigateToGamePage} className={cx('custom-input__button')}>
+                                        {isSignedIn ? 'Join to the game' : 'Get started for free'}
                                     </button>
                                 </div>
-                            )}
-
-                            <div className={cx('custom-input__wrapper')}>
-                                <button onClick={navigateToGamePage} className={cx('custom-input__button')}>
-                                    {isSignedIn ? 'Join to the game' : 'Get started for free'}
-                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
+            </div>
+            {showModal && (
+                // Render your modal component here
+                <Modal>
+                    <h2>Coming soon....</h2>
+                    <p>Pleased waiting for second</p>
+                </Modal>
             )}
-        </div>
+        </>
     );
 }
 

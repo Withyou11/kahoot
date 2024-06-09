@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from './CreateRoom.module.scss';
+import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import HomepageHeader from '~/pages/Home/HomepageHeader/HomepageHeader';
 import Loading from '~/components/Loading/Loading';
 import Participant from '~/components/Participant/Participant';
 import { io } from 'socket.io-client';
+import { questionApi } from '~/api/questions';
 
 const cx = classNames.bind(styles);
 
@@ -17,10 +19,12 @@ function CreateRoom() {
     });
 
     const [roomCode, setRoomCode] = useState();
+    const [roomId, setRoomId] = useState();
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [profilePic, setProfilePic] = useState('');
+    const navigator = useNavigate();
 
     const [loading, setLoading] = useState(false);
     const [participants, setParticipants] = useState([]);
@@ -29,8 +33,23 @@ function CreateRoom() {
     };
 
     const handlePlayNow = () => {
+        questionApi
+            .getQuestion(1, id)
+            .then((res) => {
+                let tempData = {
+                    question: res.data.data.data[0],
+                    totalCount: res.data.data.meta.totalCount,
+                };
+                // dispatch(initialQuestion(tempData));
+                // setLoading(false);
+                socket.emit('startQuiz', { roomCode: roomCode, totalQuestion: tempData.totalCount });
+                navigator(`/questions/${roomCode}/${roomId}/${id}`);
+            })
+            .catch((error) => {
+                console.log(error);
+                // setLoading(false);
+            });
         // Socket
-        socket.emit('startQuiz', { roomCode: roomCode });
     };
 
     useEffect(() => {
@@ -57,6 +76,8 @@ function CreateRoom() {
                             })
                             .then((response) => {
                                 setRoomCode(response?.data.data.code);
+                                setRoomId(response?.data.data.id);
+                                console.log('create room ', response?.data.data);
                                 socket.emit('userConnected', {
                                     userId: res?.data?.id,
                                     roomCode: response?.data.data.code,

@@ -11,15 +11,22 @@ export const questionSlide = createSlice({
     reducers: {
         initialQuestion: (state, action) => {
             state.question = action.payload.question;
+            state.currentQuestion = 1;
+            state.maxQuestion = action.payload.totalCount;
+        },
+        getNextQuestion: (state, action) => {
+            state.question = action.payload.question;
             state.maxQuestion = action.payload.totalCount;
         },
         nextQuestionRD: (state) => {
-            console.log(state.maxQuestion);
-            if (state.currentQuestion <= state.maxQuestion) state.currentQuestion += 1;
-
-            if (state.currentQuestion > state.maxQuestion) {
-                state.currentQuestion -= 1;
+            // console.log('curent question', state.currentQuestion);
+            // console.log('max question', state.maxQuestion);
+            if (state.currentQuestion < state.maxQuestion) {
+                // console.log('jump into here');
+                state.currentQuestion = state.currentQuestion + 1;
+            } else if (state.currentQuestion === state.maxQuestion) {
                 state.endQuiz = true;
+                state.currentQuestion = 1;
             }
         },
         // setNumberOfQuestion: (state, action) => {
@@ -28,5 +35,5 @@ export const questionSlide = createSlice({
     },
 });
 
-export const { initialQuestion, nextQuestionRD } = questionSlide.actions;
+export const { initialQuestion, getNextQuestion, nextQuestionRD } = questionSlide.actions;
 export default questionSlide.reducer;

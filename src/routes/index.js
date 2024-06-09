@@ -6,6 +6,7 @@ import SignIn from '~/pages/Authentication/SignIn/SignIn';
 import SignUp from '~/pages/Authentication/SignUp/SignUp';
 import Question from '~/pages/Question';
 import UserPlay from '~/pages/UserPlay';
+import Test from '~/pages/Test';
 
 // Public routes
 const publicRoutes = [
@@ -16,8 +17,9 @@ const publicRoutes = [
     { path: '/create-room/:id', component: CreateRoom },
     { path: '/sign-in', component: SignIn },
     { path: '/sign-up', component: SignUp },
-    { path: '/questions', component: Question },
-    { path: '/user-play', component: UserPlay },
+    { path: '/questions/:roomCode/:roomId/:id', component: Question },
+    { path: '/user-play/:roomCode', component: UserPlay },
+    { path: '/test', component: Test },
 ];
 
 const privateRoutes = [];
