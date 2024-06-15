@@ -88,10 +88,11 @@
 
 .modalContent {
     background-color: #fff;
-    padding: 20px;
+    // padding: 20px;
     border-radius: 10px;
-    width: 300px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    height: 500px;
+    width: 300px;
 }
 
 .closeButton {
@@ -101,4 +102,22 @@
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
+}
+.button {
+    margin-top: 200px;
+    top: 10vh;
+    right: 10px;
+    padding: 5px 15px;
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.rankText {
+    color: white;
+    font-size: 40px;
+    font-weight: 600;
 }

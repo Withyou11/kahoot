@@ -33,7 +33,21 @@ const answer_question = (input) => {
     });
 };
 
+const get_answer_question = (input) => {
+    const { roomCode, questionId } = input;
+    return new Promise((resolve, reject) => {
+        base.get(`rooms/get-user-answers?roomCode=${roomCode}&questionId=${questionId}`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        })
+            .then((response) => resolve(response))
+            .catch((error) => reject(error));
+    });
+};
+
 export const roomApi = {
     update_user_rank,
     answer_question,
+    get_answer_question,
 };

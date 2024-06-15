@@ -1,0 +1,36 @@
+.quizContainer {
+    color: white;
+    max-width: 100vw;
+    text-align: center;
+    padding: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    // align-items: center;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    font-size: 1.5em;
+    margin: 0 0 10px;
+}
+
+h1 {
+    font-size: 4em;
+    margin: 20px 0;
+}
+
+.progressBar {
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.progress {
+    height: 100%;
+    background-color: #fff;
+}

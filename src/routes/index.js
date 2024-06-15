@@ -7,6 +7,7 @@ import SignUp from '~/pages/Authentication/SignUp/SignUp';
 import Question from '~/pages/Question';
 import UserPlay from '~/pages/UserPlay';
 import Test from '~/pages/Test';
+import SubResult from '~/pages/Question/SubResult';
 
 // Public routes
 const publicRoutes = [

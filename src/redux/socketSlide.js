@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     socket: null,
     endQuestionSocket: null,
+    answerSocket: null,
 };
 export const socketSlice = createSlice({
     name: 'socket',
@@ -12,6 +13,9 @@ export const socketSlice = createSlice({
         },
         setEndQuestionSocket: (state, action) => {
             state.endQuestionSocket = action.payload;
+        },
+        setAnswerSocket: (state, action) => {
+            state.answerSocket = action.payload;
         },
         // getNextQuestion: (state, action) => {
         //     state.question = action.payload.question;
@@ -34,5 +38,5 @@ export const socketSlice = createSlice({
     },
 });
 
-export const { initialSocket, setEndQuestionSocket } = socketSlice.actions;
+export const { initialSocket, setEndQuestionSocket, setAnswerSocket } = socketSlice.actions;
 export default socketSlice.reducer;

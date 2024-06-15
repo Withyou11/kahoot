@@ -26,11 +26,22 @@ function Homepage() {
     const [showModal, setShowModal] = useState(false);
     const [questionId, setQuestionId] = useState();
     const dispatch = useDispatch();
+    const [socket, setSocket] = useState(null);
     const [roomCode, setRoomCode] = useState('');
 
-    const socket = io('https://quiz-lab-server.onrender.com', {
-        transports: ['websocket'],
-    });
+    // const socket = io('https://quiz-lab-server.onrender.com', {
+    //     transports: ['websocket'],
+    // });
+
+    useEffect(() => {
+        // Tạo một WebSocket kết nối tới server
+        const newSocket = io('https://quiz-lab-server.onrender.com', {
+            transports: ['websocket'],
+        });
+        setSocket(newSocket);
+
+        dispatch(initialSocket(newSocket));
+    }, []);
 
     const navigateToGamePage = async () => {
         if (isSignedIn) {
@@ -57,9 +68,8 @@ function Homepage() {
                     socket.emit('userConnected', { userId, roomCode });
                     const roomCodeHolder = roomCode;
                     setShowModal(true);
-                    dispatch(initialSocket(socket));
+                    console.log('room code after', roomCodeHolder);
                     socket.on('startQuiz', ({ roomCode, totalQuestion }) => {
-                        console.log('room code after', roomCode);
                         setShowModal(false);
                         navigate(`/user-play/${roomCodeHolder}`, { state: { totalQuestion: totalQuestion } });
                     });
@@ -79,6 +89,7 @@ function Homepage() {
 
     useEffect(() => {
         const accessToken = localStorage.getItem('accessToken');
+
         if (accessToken) {
             setIsSignedIn(true);
 

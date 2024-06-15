@@ -19,21 +19,21 @@ export const questionSlide = createSlice({
             state.maxQuestion = action.payload.totalCount;
         },
         nextQuestionRD: (state) => {
-            // console.log('curent question', state.currentQuestion);
-            // console.log('max question', state.maxQuestion);
             if (state.currentQuestion < state.maxQuestion) {
-                // console.log('jump into here');
                 state.currentQuestion = state.currentQuestion + 1;
-            } else if (state.currentQuestion === state.maxQuestion) {
+            }
+            if (state.currentQuestion === state.maxQuestion) {
                 state.endQuiz = true;
-                state.currentQuestion = 1;
             }
         },
-        // setNumberOfQuestion: (state, action) => {
-        //     state.action = action.payload;
-        // },
+        endQuiz: (state) => {
+            state.question = {};
+            state.maxQuestion = 0;
+            state.currentQuestion = 1;
+            state.endQuiz = false;
+        },
     },
 });
 
-export const { initialQuestion, getNextQuestion, nextQuestionRD } = questionSlide.actions;
+export const { initialQuestion, getNextQuestion, nextQuestionRD, endQuiz } = questionSlide.actions;
 export default questionSlide.reducer;

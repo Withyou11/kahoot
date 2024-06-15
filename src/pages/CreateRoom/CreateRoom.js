@@ -9,14 +9,16 @@ import Loading from '~/components/Loading/Loading';
 import Participant from '~/components/Participant/Participant';
 import { io } from 'socket.io-client';
 import { questionApi } from '~/api/questions';
+import { useSelector } from 'react-redux';
 
 const cx = classNames.bind(styles);
 
 function CreateRoom() {
     let { id } = useParams();
-    const socket = io('https://quiz-lab-server.onrender.com', {
-        transports: ['websocket'],
-    });
+    // const socket = io('https://quiz-lab-server.onrender.com', {
+    //     transports: ['websocket'],
+    // });
+    const socket = useSelector((state) => state.socket.socket);
 
     const [roomCode, setRoomCode] = useState();
     const [roomId, setRoomId] = useState();
