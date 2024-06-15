@@ -1,0 +1,123 @@
+.container {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: #5571ec;
+    background: linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
+    background: -webkit-linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
+    background: -moz-linear-gradient(0deg, #5571ec 0%, #3590f3 80%);
+}
+
+.item {
+    width: 25vw;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    padding: 20px;
+    cursor: pointer;
+}
+
+.item:nth-child(1) {
+    background-color: #d01937;
+}
+
+.item:nth-child(2) {
+    background-color: #7c46b0;
+}
+
+.item:nth-child(3) {
+    background-color: #237e0b;
+}
+
+.item:nth-child(4) {
+    background-color: #c79200;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 40px;
+    width: 100vw;
+    position: absolute;
+    background-color: white;
+    justify-content: space-between;
+    align-items: center;
+}
+.footer {
+    background-color: white;
+    position: absolute;
+    bottom: 0;
+    padding: 20px;
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.headerQuestion {
+    font-size: 30px;
+}
+.point {
+    color: white;
+    background-color: black;
+    padding: 20px 40px;
+    font-size: 25px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalContent {
+    background-color: #fff;
+    // padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    height: 500px;
+    width: 300px;
+}
+
+.closeButton {
+    background: red;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.button {
+    margin-top: 200px;
+    top: 10vh;
+    right: 10px;
+    padding: 5px 15px;
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.rankText {
+    color: white;
+    font-size: 40px;
+    font-weight: 600;
+}

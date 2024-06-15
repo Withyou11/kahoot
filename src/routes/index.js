@@ -4,6 +4,10 @@ import ManageQuestions from '~/pages/ManageQuestions/ManageQuestions';
 import CreateRoom from '~/pages/CreateRoom/CreateRoom';
 import SignIn from '~/pages/Authentication/SignIn/SignIn';
 import SignUp from '~/pages/Authentication/SignUp/SignUp';
+import Question from '~/pages/Question';
+import UserPlay from '~/pages/UserPlay';
+import Test from '~/pages/Test';
+import SubResult from '~/pages/Question/SubResult';
 import History from '~/pages/History/History';
 
 // Public routes
@@ -16,6 +20,9 @@ const publicRoutes = [
     { path: '/sign-in', component: SignIn },
     { path: '/sign-up', component: SignUp },
     { path: '/my-history', component: History },
+    { path: '/questions/:roomCode/:roomId/:id', component: Question },
+    { path: '/user-play/:roomCode', component: UserPlay },
+    { path: '/test', component: Test },
 ];
 
 const privateRoutes = [];
