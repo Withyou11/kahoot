@@ -46,8 +46,21 @@ const get_answer_question = (input) => {
     });
 };
 
+const get_my_rank = (roomCode) => {
+    return new Promise((resolve, reject) => {
+        base.get(`rooms/get-my-rank/${roomCode}`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        })
+            .then((response) => resolve(response))
+            .catch((error) => reject(error));
+    });
+};
+
 export const roomApi = {
     update_user_rank,
     answer_question,
     get_answer_question,
+    get_my_rank,
 };

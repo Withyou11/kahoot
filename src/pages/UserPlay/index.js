@@ -36,6 +36,7 @@ const UserPlay = () => {
     const [ws, setWs] = useState(null);
     const newPoint = useRef(0);
     const holdPoint = useRef(0);
+    const [myRank, setMyRank] = useState('0');
     const [userId, setUserId] = useState('');
     const [prepareBack, setPrepareBack] = useState(false);
     const [resultLoading, setResultLoading] = useState(0); //0: on answering, 1: on loading, 2: answer false, 3: answer true, 4: no response
@@ -58,9 +59,17 @@ const UserPlay = () => {
             } else {
                 setResultLoading(2);
             }
+            roomApi
+                .get_my_rank(roomCode)
+                .then((res) => {
+                    console.log('my rank: ', res.data.data.rank);
+                    setMyRank(res.data.data.rank);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         });
         socket.on('endQuiz', ({ roomId }) => {
-            console.log(roomId);
             roomApi
                 .update_user_rank(roomId)
                 .then((res) => {
@@ -71,6 +80,15 @@ const UserPlay = () => {
                 .catch((err) => {
                     console.log(err);
                 });
+            // roomApi
+            //     .get_my_rank(roomCode)
+            //     .then((res) => {
+            //         console.log('my rank: ', res.data.data.rank);
+            //         setMyRank(res.data.data.rank);
+            //     })
+            //     .catch((err) => {
+            //         console.log(err);
+            //     });
             // userApi.getMyInfo().then((res) => {
             //     setUserId(res?.data?.id);
             //     setModalIsOpen(false);
@@ -129,6 +147,9 @@ const UserPlay = () => {
                 <div className={styles.headerQuestion}>
                     Pin: <b>{roomCode}</b>
                 </div>
+
+                {myRank === '0' ? <></> : <div className={styles.headerQuestion}>Rank: {myRank}</div>}
+
                 <div className={styles.headerQuestion}>
                     {question.sortOrder} of {totalQuestion}
                 </div>
@@ -144,8 +165,8 @@ const UserPlay = () => {
 
             {prepareBack ? (
                 <div className={styles.container} style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div className={styles.rankText}>Top 1</div>
-                    <div className={styles.button}>
+                    <div className={styles.rankText}>Top ${myRank}</div>
+                    <div className={styles.button} onClick={() => navigate('/')}>
                         <span>Exit</span>
                     </div>
                 </div>
