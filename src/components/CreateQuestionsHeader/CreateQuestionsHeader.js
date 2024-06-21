@@ -251,32 +251,33 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
                     console.log('updatedQuestions: ', updatedQuestions);
                     console.log('deletedQuestionIds: ', deletedQuestionIds);
                     const preparedData = prepareDataForUpdate();
-                    console.log(preparedData);
-                    // callAPIUpdate(preparedData);
+                    callAPIUpdate(preparedData);
                 } else {
                     const preparedDataForCreate = prepareQuestionsForCreate(questions);
                     callAPICreate(preparedDataForCreate);
                 }
-                // setShowAddnewQuestionToast(true);
             }
         } else {
-            window.alert('Please enter title of question set!');
+            window.alert('Please enter title of the quiz!');
         }
     };
 
     function callAPIUpdate(data) {
-        axios
-            .patch(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, data, {
-                headers: {
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoidXNlcjNAZ21haWwuY29tIn0sImlhdCI6MTcxNDIwNTc0NywiZXhwIjoxNzE2Nzk3NzQ3fQ.LFFHvwQWuWokTwvJ3fKfSL1slCo48oyWvGxgkDkP-Fs`,
-                },
-            })
-            .then((res) => {
-                navigate('/manage-quizzes');
-            })
-            .catch((e) => {
-                console.log(e);
-            });
+        const accessToken = localStorage.getItem('accessToken');
+        if (accessToken) {
+            axios
+                .patch(`https://quiz-lab-server.onrender.com/api/quizzes/${id}`, data, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                })
+                .then((res) => {
+                    navigate('/manage-quizzes');
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        }
     }
 
     function callAPICreate(data) {
@@ -356,7 +357,7 @@ function CreateQuestionsHeader({ questions, setQuestions, quizInfo, setQuizInfo 
                                         value={name}
                                         required
                                         onChange={handleInputNameChange}
-                                        placeholder="Enter title of question set..."
+                                        placeholder="Enter title of the quiz..."
                                     />
                                 </div>
 

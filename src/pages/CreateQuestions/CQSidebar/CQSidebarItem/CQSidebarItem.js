@@ -33,7 +33,11 @@ function CQSidebarItem({ question, index, questions, setQuestions, selectedQuest
             });
 
             setQuestions(newQuestions);
-            if (!deletedQuestionIds.includes(question.id)) {
+            if (
+                !deletedQuestionIds.includes(question.id) &&
+                !question.id.includes('e') &&
+                !question.id.includes('question')
+            ) {
                 setDeletedQuestionIds((oldArray) => [...oldArray, question.id]);
             }
         }
