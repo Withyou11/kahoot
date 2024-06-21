@@ -218,11 +218,13 @@ const Image = ({
                     <span>{answerNumber}</span>
                     <span>Answer</span>
                     <div className={styles.skip} onClick={() => nextQuestion()}>
-                        <span>{showResult === false ? 'result' : endQuizState === false ? 'next' : 'finish'}</span>
+                        <span>
+                            {showResult === false ? 'End question' : endQuizState === false ? 'next' : 'finish'}
+                        </span>
                     </div>
                     {showResult && (
                         <div className={styles.skip} style={{ top: 20 }} onClick={() => setSubResult(true)}>
-                            <span>BXH</span>
+                            <span>Show ranking</span>
                         </div>
                     )}
                 </div>

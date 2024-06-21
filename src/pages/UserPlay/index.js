@@ -165,7 +165,7 @@ const UserPlay = () => {
 
             {prepareBack ? (
                 <div className={styles.container} style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div className={styles.rankText}>Top ${myRank}</div>
+                    <div className={styles.rankText}>Top {myRank}</div>
                     <div className={styles.button} onClick={() => navigate('/')}>
                         <span>Exit</span>
                     </div>
